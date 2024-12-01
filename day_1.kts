@@ -2,7 +2,7 @@ import java.io.File
 import kotlin.math.abs
 
 private fun solvePart1() {
-	val (list1, list2) = File("/home/iwn/git/advent-of-code-2024/app/src/main/resources/day1_input.txt")
+	val (list1, list2) = File("/home/iwn/git/advent-of-code-2024/input/day1_input.txt")
 		.readLines()
 		.map {
 			val (a, b) = it.trim().split("   ").map(String::toInt)
@@ -16,7 +16,7 @@ private fun solvePart1() {
 
 private fun solvePart2() {
 
-	val (list1, list2) = File("/home/iwn/git/advent-of-code-2024/app/src/main/resources/day1_input.txt")
+	val (list1, list2) = File("/home/iwn/git/advent-of-code-2024/input/day1_input.txt")
 		.readLines()
 		.map {
 			val (a, b) = it.trim().split("   ").map(String::toInt)
