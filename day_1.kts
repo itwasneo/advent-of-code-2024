@@ -1,37 +1,56 @@
 import java.io.File
+import java.nio.ByteBuffer
 import kotlin.math.abs
-import kotlin.time.measureTimedValue
+import kotlin.time.measureTime
 
-private fun readFileWithReadLines(fileName: String): Pair<List<Int>, List<Int>> {
-	return File(fileName)
-		.readLines()
-		.map {
-			val (a, b) = it.trim().split("   ").map(String::toInt)
-			a to b
-		}
-		.unzip()
+val arr1 = IntArray(1000)
+val arr2 = IntArray(1000)
+
+private fun readFileWithBuffer(fileName: String) {
+	var idx = 0
+	File(fileName).forEachBlock(1400) { buffer, _ ->
+		val byteBuffer = ByteBuffer.wrap(buffer)
+		do {
+			val l = ByteArray(5)
+			val r = ByteArray(5)
+			byteBuffer.get(l)
+			byteBuffer.position(byteBuffer.position() + 3)
+			byteBuffer.get(r)
+			byteBuffer.position(byteBuffer.position() + 1)
+			val lv = String(l, Charsets.UTF_8).toInt()
+			val rv = String(r, Charsets.UTF_8).toInt()
+			arr1[idx] = lv
+			arr2[idx] = rv
+			idx += 1
+		} while(byteBuffer.remaining() >= 13)
+	}
 }
 
 private fun solvePart1() {
-	val result = list1.sorted().zip(list2.sorted()) { a, b -> abs(a - b) }.sum()
+	val result = arr1.sorted().zip(arr2.sorted()) { a, b -> abs(a - b) }.sum()
 	println("Part 1: $result")
 }
 
 private fun solvePart2() {
-	val frequencyMap = list2.groupingBy { it }.eachCount()
-	val result = list1.sumOf {
+	val frequencyMap = arr2.toList().groupingBy { it }.eachCount()
+	val result = arr1.sumOf {
 		it * (frequencyMap[it] ?: 0)
 	}
 	println("Part 2: $result")
 }
 
-val timedResult = measureTimedValue {
-		readFileWithReadLines("/home/iwn/git/advent-of-code-2024/input/day1_input.txt")
-	}
-val (list1, list2) = timedResult.value
+val fileReadDuration = measureTime {
+	readFileWithBuffer("/home/iwn/git/advent-of-code-2024/input/day1_input.txt")
+}
 
-println("File Read Elapsed Time: ${timedResult.duration}")
+println("File Read Elapsed Time: $fileReadDuration")
 
-solvePart1()
+val part1Duration = measureTime {
+	solvePart1()
+}
+println("Part 1 Elapsed Time: $part1Duration")
 
-solvePart2()
+val part2Duration = measureTime {
+	solvePart2()
+}
+println("Part 2 Elapsed Time: $part2Duration")
