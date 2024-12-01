@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ -z "$1" ]; then
-    echo "Usage: $0 <KotlinFile.kt>"
+    echo "Usage: $0 <KotlinFile.kts>"
     exit 1
 fi
 
@@ -11,7 +11,6 @@ if [ ! -f "$KOTLIN_FILE" ]; then
 	exit 1
 fi
 
-OUTPUT_JAR="${KOTLIN_FILE%.*}.jar"
 WATCH_DIR="."
 
 # I don't use sdkman functions Autoloaded
@@ -22,12 +21,7 @@ while true; do
 
 	inotifywait -e modify,create,delete "$WATCH_DIR"
 
-	time  kotlinc -script day_1.kts
-
-	#time { 
-	#	kotlinc "$KOTLIN_FILE" -include-runtime -d "$OUTPUT_JAR" 
-	#	java -jar "$OUTPUT_JAR"
-	#}
+	time  kotlinc -script "$KOTLIN_FILE"
 
 done
 
