@@ -5,11 +5,13 @@ package com.itwasneo
 
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.Assertions.assertNotNull
+import org.junit.jupiter.api.assertThrows
+import java.io.FileNotFoundException
 
 class AppTest {
     @Test
     fun appHasAGreeting() {
         val classUnderTest = App()
-        assertNotNull(classUnderTest.greeting, "app should have a greeting")
+        assertThrows<FileNotFoundException> { classUnderTest.readInput("")  }
     }
 }
