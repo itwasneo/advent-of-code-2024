@@ -14,12 +14,12 @@ class Day1(override val inputFileName: String) : DailyPuzzle {
         val (list1, list2) = File(inputFileName)
             .readLines()
             .map {
-                val (a, b) = it.trim().split("\\s+".toRegex()).map(String::toInt)
+                val (a, b) = it.trim().split("   ").map(String::toInt)
                 a to b
             }
             .unzip()
 
-        val result = list1.sorted().zip(list2.sorted()) { a, b -> abs( a - b) }.sum()
+        val result = list1.sorted().zip(list2.sorted()) { a, b -> abs(a - b) }.sum()
 
         println("Part 1: $result")
     }
@@ -28,13 +28,13 @@ class Day1(override val inputFileName: String) : DailyPuzzle {
         val (list1, list2) = File(inputFileName)
             .readLines()
             .map {
-                val (a, b) = it.trim().split("\\s+".toRegex()).map(String::toInt)
+                val (a, b) = it.trim().split("   ").map(String::toInt)
                 a to b
             }
             .unzip()
 
         val frequencyMap = list2.groupingBy { it }.eachCount()
-        val result =list1.sumOf {
+        val result = list1.sumOf {
             it * (frequencyMap[it] ?: 0)
         }
         println("Part 2: $result")
