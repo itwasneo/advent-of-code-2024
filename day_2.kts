@@ -1,14 +1,18 @@
 import java.io.File
 import kotlin.math.abs
+import kotlin.time.measureTime
 
 fun solve(fileName: String) {
 	var resultPart1 = 0
 	var resultPart2 = 0
-	File(fileName).forEachLine {
-		val a = it.split(" ").map(String::toInt)
-		resultPart1 += isSafe(a)
-		resultPart2 += isSafeWithToleration(a)
+	val duration = measureTime {
+		File(fileName).forEachLine {
+			val a = it.split(" ").map(String::toInt)
+			resultPart1 += isSafe(a)
+			resultPart2 += isSafeWithToleration(a)
+		}
 	}
+	println("Total Duration: $duration")
 	println("Part 1: $resultPart1")
 	println("Part 2: $resultPart2")
 }
@@ -56,7 +60,7 @@ fun isSafeWithToleration(report: List<Int>): Int {
 	if (isReportSafe(flr) == flr.size - 1) return 1
 	val frr = report.filterIndexed { index, _ -> index != i + 1 }
 	if (isReportSafe(frr) == frr.size - 1) return 1
-	else return 0
+	return 0
 }
 
 // Utility functions for readibility -------------------------------------------------
