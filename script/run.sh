@@ -15,6 +15,10 @@ if [ ! -f "$SCRIPT_FILE" ]; then
     exit 1
 fi
 
+# I don't use sdkman functions Autoloaded
+source ~/workspace/script/enable_sdkman.sh
+enable_sdkman
+
 # Run the script with time measurement
 time kotlinc -script "$SCRIPT_FILE"
 

@@ -28,7 +28,7 @@ private fun readFileWithBuffer(fileName: String) {
 
 private fun solvePart1() {
 	val result = arr1.sorted().zip(arr2.sorted()) { a, b -> abs(a - b) }.sum()
-	println("Part 1: $result")
+	println("1: $result")
 }
 
 private fun solvePart2() {
@@ -36,21 +36,18 @@ private fun solvePart2() {
 	val result = arr1.sumOf {
 		it * (frequencyMap[it] ?: 0)
 	}
-	println("Part 2: $result")
+	println("2: $result")
 }
 
 val fileReadDuration = measureTime {
 	readFileWithBuffer("/home/iwn/git/advent-of-code-2024/input/day1_input.txt")
 }
 
-println("File Read Elapsed Time: $fileReadDuration")
+println("P: $fileReadDuration")
 
-val part1Duration = measureTime {
+val duration = measureTime {
 	solvePart1()
-}
-println("Part 1 Elapsed Time: $part1Duration")
-
-val part2Duration = measureTime {
 	solvePart2()
 }
-println("Part 2 Elapsed Time: $part2Duration")
+println("T: $duration")
+
