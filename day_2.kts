@@ -1,29 +1,24 @@
 import java.io.File
 import kotlin.math.abs
 
-fun solvePart1(fileName: String) {
-	var result = 0
+fun solve(fileName: String) {
+	var resultPart1 = 0
+	var resultPart2 = 0
 	File(fileName).forEachLine {
 		val a = it.split(" ").map(String::toInt)
-		result += isSafe(a)
+		resultPart1 += isSafe(a)
+		resultPart2 += isSafeWithToleration(a)
 	}
-	println("Part 1: $result")
+	println("Part 1: $resultPart1")
+	println("Part 2: $resultPart2")
 }
 
-fun solvePart2(fileName: String) {
-	var result = 0
-	File(fileName).forEachLine {
-		val a = it.split(" ").map(String::toInt)
-		result += isSafeWithToleration(a)
-	}
-	println("Part 2: $result")
-}
-
+/**
+ * Validation function for Part 1. Returns 1 if report is valid, 0 invalid
+ */
 fun isSafe(report: List<Int>): Int {
 	val reportType = getReportType(report[0], report[1])
-
 	var index = 0
-
 	while (index < report.size - 1) {
 		if (!checkOrder(report[index], report[index+1], reportType) || !checkDiff(report[index], report[index+1], reportType)) {
 			return 0
@@ -33,14 +28,14 @@ fun isSafe(report: List<Int>): Int {
 	return 1
 }
 
+/**
+ * Return the problematic index
+ */
 fun isReportSafe(report: List<Int>): Int {
-
 	val reportType = getReportType(report[0], report[1])
-
 	var index = 0
-
 	while (index < report.size - 1) {
-		if (!checkOrder(report[index], report[index+1], reportType) || !checkDiff(report[index], report[index+1], reportType)) {
+		if (!isValid(report[index], report[index + 1], reportType)) {
 			return index
 		}
 		index += 1
@@ -48,6 +43,10 @@ fun isReportSafe(report: List<Int>): Int {
 	return index
 }
 
+/**
+ * Once the validation fail, filter out the i, i-1, i+1 indeces
+ * one by one and revalidate again
+ */
 fun isSafeWithToleration(report: List<Int>): Int {
 	val i = isReportSafe(report)
 	if (i == report.size - 1) return 1
@@ -60,8 +59,7 @@ fun isSafeWithToleration(report: List<Int>): Int {
 	else return 0
 }
 
-
-
+// Utility functions for readibility -------------------------------------------------
 enum class ReportType {
 	INC,
 	DEC,
@@ -94,12 +92,6 @@ fun checkDiff(l: Int, r: Int, reportType: ReportType): Boolean {
 fun isValid(l: Int, r: Int, reportType: ReportType): Boolean {
 	return checkOrder(l, r, reportType) && checkDiff(l, r, reportType) 
 }
+// -----------------------------------------------------------------------------
 
-fun isSafeModified(report: List<Int>): Int {
-	val reportType = getReportType(report[0], report[1])
-
-	return 0
-}
-
-solvePart1("/home/iwn/git/advent-of-code-2024/input/day2_input.txt")
-solvePart2("/home/iwn/git/advent-of-code-2024/input/day2_input.txt")
+solve("/home/iwn/git/advent-of-code-2024/input/day2_input.txt")
