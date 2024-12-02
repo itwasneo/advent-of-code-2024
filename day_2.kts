@@ -1,50 +1,48 @@
 import java.io.File
 import kotlin.math.abs
 import kotlin.time.measureTime
+import kotlin.time.measureTimedValue
 
-fun solve(fileName: String) {
+val (input, readDuration) = measureTimedValue {
+	File("/home/iwn/git/advent-of-code-2024/input/day2_input.txt")
+		.readLines()
+		.map { line ->
+			line.split(" ").map(String::toInt) 
+		}
+	}
+
+println("P: $readDuration")
+
+fun solve() {
 	var resultPart1 = 0
 	var resultPart2 = 0
 	val duration = measureTime {
-		File(fileName).forEachLine {
-			val a = it.split(" ").map(String::toInt)
-			resultPart1 += isSafe(a)
-			resultPart2 += isSafeWithToleration(a)
+		input.forEach {
+			resultPart1 += isSafe(it)
+			resultPart2 += isSafeWithToleration(it)
 		}
 	}
-	println("Total Duration: $duration")
-	println("Part 1: $resultPart1")
-	println("Part 2: $resultPart2")
+	println("T: $duration")
+	println("1: $resultPart1")
+	println("2: $resultPart2")
 }
 
 /**
  * Validation function for Part 1. Returns 1 if report is valid, 0 invalid
  */
 fun isSafe(report: List<Int>): Int {
-	val reportType = getReportType(report[0], report[1])
-	var index = 0
-	while (index < report.size - 1) {
-		if (!checkOrder(report[index], report[index+1], reportType) || !checkDiff(report[index], report[index+1], reportType)) {
-			return 0
-		}
-		index += 1
-	}
-	return 1
+	val rt = getReportType(report[0], report[1])
+	return if (report.zipWithNext().all { (a, b) -> isValid(a, b, rt) }) 1 else 0
 }
 
 /**
  * Return the problematic index
  */
 fun isReportSafe(report: List<Int>): Int {
-	val reportType = getReportType(report[0], report[1])
-	var index = 0
-	while (index < report.size - 1) {
-		if (!isValid(report[index], report[index + 1], reportType)) {
-			return index
-		}
-		index += 1
-	}
-	return index
+	val rt = getReportType(report[0], report[1])
+	return report.zipWithNext()
+		.indexOfFirst { (a, b) -> !isValid(a, b, rt) }
+		.takeIf { it >= 0 } ?: report.size - 1
 }
 
 /**
@@ -70,18 +68,16 @@ enum class ReportType {
 	ERR
 }
 
-fun getReportType(l: Int, r: Int): ReportType {
-	if (r > l) return ReportType.INC
-	else if (l > r) return ReportType.DEC
-	else return ReportType.ERR
+fun getReportType(l: Int, r: Int): ReportType = when {
+	r > l -> ReportType.INC
+	l > r -> ReportType.DEC
+	else -> ReportType.ERR
 }
 
-fun checkOrder(l: Int, r: Int, reportType: ReportType): Boolean {
-	return when (reportType) {
-		ReportType.INC -> r > l
-		ReportType.DEC -> l > r
-		ReportType.ERR -> false
-	}
+fun checkOrder(l: Int, r: Int, reportType: ReportType): Boolean = when(reportType) {
+	ReportType.INC -> r > l
+	ReportType.DEC -> l > r
+	ReportType.ERR -> false
 }
 
 fun checkDiff(l: Int, r: Int, reportType: ReportType): Boolean {
@@ -90,7 +86,7 @@ fun checkDiff(l: Int, r: Int, reportType: ReportType): Boolean {
 		ReportType.DEC -> l - r
 		ReportType.ERR -> -1
 	}
-	return diff >= 1 && diff <= 3
+	return diff in 1..3
 }
 
 fun isValid(l: Int, r: Int, reportType: ReportType): Boolean {
@@ -98,4 +94,4 @@ fun isValid(l: Int, r: Int, reportType: ReportType): Boolean {
 }
 // -----------------------------------------------------------------------------
 
-solve("/home/iwn/git/advent-of-code-2024/input/day2_input.txt")
+solve()
