@@ -1,11 +1,10 @@
-import java.io.File
-import kotlin.math.abs
+import java.nio.file.Files
+import java.nio.file.Paths
 import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 
 val (input, readDuration) = measureTimedValue {
-	File("/home/iwn/git/advent-of-code-2024/input/day2_input.txt")
-		.readLines()
+	Files.readAllLines(Paths.get("input\\day2_input.txt"))
 		.map { line ->
 			line.split(" ").map(String::toInt) 
 		}
@@ -42,7 +41,7 @@ fun isReportSafe(report: List<Int>): Int {
 	val rt = getReportType(report[0], report[1])
 	return report.zipWithNext()
 		.indexOfFirst { (a, b) -> !isValid(a, b, rt) }
-		.takeIf { it >= 0 } ?: report.size - 1
+		.takeIf { it >= 0 } ?: (report.size - 1)
 }
 
 /**

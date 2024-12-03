@@ -1,10 +1,12 @@
-import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.Path
 import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 
 val (content, duration) = measureTimedValue {
-    File("input\\day3_input.txt").readText()
+    Files.readString(Path("input\\day3_input.txt"))
 }
+
 println("P: $duration")
 
 fun solve1() {

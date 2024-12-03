@@ -1,5 +1,6 @@
-import java.io.File
+import java.nio.file.Files
 import java.nio.ByteBuffer
+import java.nio.file.Paths
 import kotlin.math.abs
 import kotlin.time.measureTime
 
@@ -7,23 +8,37 @@ val arr1 = IntArray(1000)
 val arr2 = IntArray(1000)
 
 private fun readFileWithBuffer(fileName: String) {
+	val path = Paths.get(fileName)
+	val fileChannel = Files.newByteChannel(path)
+	val bufferSize = 1400
+	val buffer = ByteBuffer.allocate(bufferSize)
 	var idx = 0
-	File(fileName).forEachBlock(1400) { buffer, _ ->
-		val byteBuffer = ByteBuffer.wrap(buffer)
+
+	while (fileChannel.read(buffer) != -1) {
+		buffer.flip() // Prepare the buffer for reading
+
+		// Process the buffer content in blocks
 		do {
 			val l = ByteArray(5)
 			val r = ByteArray(5)
-			byteBuffer.get(l)
-			byteBuffer.position(byteBuffer.position() + 3)
-			byteBuffer.get(r)
-			byteBuffer.position(byteBuffer.position() + 1)
+			buffer.get(l)
+			buffer.position(buffer.position() + 3)
+			buffer.get(r)
+			buffer.position(buffer.position() + 1)
+
 			val lv = String(l, Charsets.UTF_8).toInt()
 			val rv = String(r, Charsets.UTF_8).toInt()
+
+			// Assuming arr1 and arr2 are already defined and have the appropriate size
 			arr1[idx] = lv
 			arr2[idx] = rv
 			idx += 1
-		} while(byteBuffer.remaining() >= 13)
+		} while (buffer.remaining() >= 13)
+
+		buffer.clear() // Clear the buffer for the next read
 	}
+
+	fileChannel.close() // Close the file channel}
 }
 
 private fun solvePart1() {
@@ -40,7 +55,7 @@ private fun solvePart2() {
 }
 
 val fileReadDuration = measureTime {
-	readFileWithBuffer("/home/iwn/git/advent-of-code-2024/input/day1_input.txt")
+	readFileWithBuffer("input\\day1_input.txt")
 }
 
 println("P: $fileReadDuration")
