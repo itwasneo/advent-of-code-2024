@@ -3,7 +3,7 @@ import kotlin.time.measureTime
 import kotlin.time.measureTimedValue
 
 val (content, duration) = measureTimedValue {
-    File("C:\\Users\\kaany\\Desktop\\workspace\\advent-of-code-2024\\input\\day3_input.txt").readText()
+    File("input\\day3_input.txt").readText()
 }
 println("P: $duration")
 
