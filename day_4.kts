@@ -53,25 +53,19 @@ fun solve1() {
     println("1: $result")
 }
 
-val c = intArrayOf(1, -1, -1, 1, -1, -1, 1, 1)
-
 fun solve2() {
     var result = 0
-    for (i in input.indices) {
-        for (j in input[0]!!.indices) {
-            if (i == 0 || i == input.size - 1 || j == 0 || j == input.size - 1) {
-                // DO NOTHING
-            } else {
-                if (input[i]!![j] == 'A') {
-                    val c1 = input[i + c[0]]!![j + c[1]]
-                    val c2 = input[i + c[2]]!![j + c[3]]
-                    val c3 = input[i + c[4]]!![j + c[5]]
-                    val c4 = input[i + c[6]]!![j + c[7]]
-                    if (((c1 == 'M' && c2 == 'S') || (c1 == 'S' && c2 == 'M')) &&
-                        ((c3 == 'M' && c4 == 'S') || (c3 == 'S' && c4 == 'M'))
-                    ) {
-                        result += 1
-                    }
+    for (i in 1..<input.size - 1) {
+        for (j in 1..<input[0]!!.size - 1) {
+            if (input[i]!![j] == 'A') {
+                val c1 = input[i + 1]!![j - 1]
+                val c2 = input[i - 1]!![j + 1]
+                val c3 = input[i - 1]!![j - 1]
+                val c4 = input[i + 1]!![j + 1]
+                if ((c1 == 'M' && c2 == 'S' || c1 == 'S' && c2 == 'M') &&
+                    (c3 == 'M' && c4 == 'S' || c3 == 'S' && c4 == 'M')
+                ) {
+                    result += 1
                 }
             }
         }
