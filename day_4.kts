@@ -1,11 +1,12 @@
-import java.io.File
+import java.nio.file.Files
+import kotlin.io.path.Path
 import kotlin.time.measureTime
 
 val dim = 140
 val input: Array<CharArray?> = arrayOfNulls(dim)
 fun readFile() {
     var r = 0
-    File("input\\day4_input.txt").forEachLine { line ->
+    Files.readAllLines(Path("input\\day4_input.txt")).forEach { line ->
         input[r] = line.trim().toCharArray()
         r++
     }
@@ -52,8 +53,7 @@ fun solve1() {
     println("1: $result")
 }
 
-val corners =
-    listOf(Pair(Pair(1, -1), Pair(-1, 1)), Pair(Pair(-1, -1), Pair(1, 1)))
+val c = intArrayOf(1, -1, -1, 1, -1, -1, 1, 1)
 
 fun solve2() {
     var result = 0
@@ -63,10 +63,10 @@ fun solve2() {
                 // DO NOTHING
             } else {
                 if (input[i]!![j] == 'A') {
-                    val c1 = input[i + corners[0].first.second]!![corners[0].first.first + j]
-                    val c2 = input[i + corners[0].second.second]!![corners[0].second.first + j]
-                    val c3 = input[i + corners[1].first.second]!![corners[1].first.first + j]
-                    val c4 = input[i + corners[1].second.second]!![corners[1].second.first + j]
+                    val c1 = input[i + c[0]]!![j + c[1]]
+                    val c2 = input[i + c[2]]!![j + c[3]]
+                    val c3 = input[i + c[4]]!![j + c[5]]
+                    val c4 = input[i + c[6]]!![j + c[7]]
                     if (((c1 == 'M' && c2 == 'S') || (c1 == 'S' && c2 == 'M')) &&
                         ((c3 == 'M' && c4 == 'S') || (c3 == 'S' && c4 == 'M'))
                     ) {
