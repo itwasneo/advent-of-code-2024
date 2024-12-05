@@ -48,14 +48,11 @@ fun solve2(): Int {
 /**
  * Using default Comparator function. (This runs waaay slower)
  */
-fun solve2Extra(): Int {
-    return u2.sumOf { update ->
-        update.sortedWith { p1, p2 ->
-            if (rar[p1][p2]) -1 else 1
-        }[update.size / 2]
-    }
+fun solve2Extra() = u2.sumOf {
+    it.sortedWith { l, r ->
+        if (rar[l][r]) -1 else 1
+    }[it.size / 2]
 }
-
 
 /**
  * Given a linked list and a value, it finds the right spot to insert the new node
