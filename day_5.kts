@@ -23,7 +23,7 @@ fun solve1() {
             }
             seen.add(cu)
         }
-        if (valid) update[update.size / 2].toInt() else 0
+        if (valid) update[update.size / 2] else 0
     }
     println("1: $result")
 }
@@ -93,7 +93,7 @@ fun getAt(node: Node?, at: Int): Int {
     repeat(at) {
         cur = cur!!.next
     }
-    return cur!!.v.toInt()
+    return cur!!.v
 }
 
 val p = measureTime {
