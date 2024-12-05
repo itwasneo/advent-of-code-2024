@@ -4,24 +4,27 @@ import kotlin.time.measureTime
 
 var r: HashMap<Int, MutableSet<Int>> = HashMap()
 var u: MutableList<MutableList<Int>> = mutableListOf()
-var u2: MutableList<MutableList<Int>> = mutableListOf()
+var u2: MutableList<MutableList<Int>> = mutableListOf() // The second part's input
+
 fun readFile() {
-    val content = Files.readString(Path("input\\day5_input.txt")).trimIndent()
-    val (p1, p2) = content.split(Regex("\\n\\s*\\n"), limit = 2)
-    p1.split("\n").forEach { rule ->
-        val (k, v) = rule.split("|", limit = 2).map(String::trim)
-            .map(String::toInt)
-        if (r[k].isNullOrEmpty()) {
-            r[k] = mutableSetOf(v)
+    var s = true
+    Files.readAllLines(Path("input\\day5_input.txt")).forEach { l ->
+        if (l.isBlank()) {
+            s = false
+        } else if (s) {
+            val (k, v) = l.split("|", limit = 2)
+                .map(String::toInt)
+            if (r[k].isNullOrEmpty()) {
+                r[k] = mutableSetOf(v)
+            } else {
+                r[k]?.add(v)
+            }
         } else {
-            r[k]?.add(v)
+            u.add(
+                l.split(",").map(String::toInt)
+                    .toMutableList()
+            )
         }
-    }
-    p2.split("\n").forEach { update ->
-        u.add(
-            update.split(",").map(String::trim).map(String::toInt)
-                .toMutableList()
-        )
     }
 }
 
@@ -32,7 +35,7 @@ fun solve1() {
         for (cu in update) {
             if (!r[cu].isNullOrEmpty() && r[cu]!!.any { seen.contains(it) }) {
                 valid = false
-                u2.add(update)
+                u2.add(update) // This prepares the input for the second part :)
                 break
             }
             seen.add(cu)
