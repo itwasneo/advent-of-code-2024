@@ -3,8 +3,8 @@ import kotlin.io.path.Path
 import kotlin.time.measureTime
 
 var rar = Array(100) {BooleanArray(100) { false } }
-var u: MutableList<MutableList<Int>> = mutableListOf()
-var u2: MutableList<MutableList<Int>> =
+var u: MutableList<List<Int>> = mutableListOf()
+var u2: MutableList<List<Int>> =
     mutableListOf() // The second part's input
 
 /**
@@ -121,7 +121,7 @@ fun readFile() {
             rar[k][v]= true
         } else {
             u.add(
-                l.split(",").map(String::toInt).toMutableList()
+                l.split(",").map(String::toInt)
             )
         }
     }
