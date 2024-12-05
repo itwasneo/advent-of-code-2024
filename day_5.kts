@@ -2,9 +2,9 @@ import java.nio.file.Files
 import kotlin.io.path.Path
 import kotlin.time.measureTime
 
-var r: HashMap<Int, MutableSet<Int>> = HashMap()
-var u: MutableList<MutableList<Int>> = mutableListOf()
-var u2: MutableList<MutableList<Int>> =
+var r: HashMap<String, MutableSet<String>> = HashMap()
+var u: MutableList<MutableList<String>> = mutableListOf()
+var u2: MutableList<MutableList<String>> =
     mutableListOf() // The second part's input
 
 /**
@@ -13,7 +13,7 @@ var u2: MutableList<MutableList<Int>> =
  */
 fun solve1() {
     val result = u.sumOf { update ->
-        val seen = mutableSetOf<Int>()
+        val seen = mutableSetOf<String>()
         var valid = true
         for (cu in update) {
             if (!r[cu].isNullOrEmpty() && r[cu]!!.any { seen.contains(it) }) {
@@ -23,12 +23,12 @@ fun solve1() {
             }
             seen.add(cu)
         }
-        if (valid) update[update.size / 2] else 0
+        if (valid) update[update.size / 2].toInt() else 0
     }
     println("1: $result")
 }
 
-data class Node(var v: Int, var next: Node?)
+data class Node(var v: String, var next: Node?)
 
 data class LinkedList(var head: Node?)
 
@@ -52,7 +52,7 @@ fun solve2() {
  * Given a linked list and a value, it finds the right spot to insert the new node
  * (according to the rule set)
  */
-fun placeNode(c: Int, ll: LinkedList) {
+fun placeNode(c: String, ll: LinkedList) {
     val rules = r[c] ?: emptySet<Int>()
     if (ll.head == null || rules.contains(ll.head!!.v)) { // Insert head if null, or has priority
         ll.head = Node(c, ll.head)
@@ -95,7 +95,7 @@ fun getAt(node: Node?, at: Int): Int {
     repeat(at) {
         cur = cur!!.next
     }
-    return cur!!.v
+    return cur!!.v.toInt()
 }
 
 val p = measureTime {
@@ -120,7 +120,6 @@ fun readFile() {
             s = false
         } else if (s) {
             val (k, v) = l.split("|", limit = 2)
-                .map(String::toInt)
             if (r[k].isNullOrEmpty()) {
                 r[k] = mutableSetOf(v)
             } else {
@@ -128,8 +127,7 @@ fun readFile() {
             }
         } else {
             u.add(
-                l.split(",").map(String::toInt)
-                    .toMutableList()
+                l.split(",").toMutableList()
             )
         }
     }
