@@ -1,8 +1,9 @@
 import java.nio.file.Files
 import kotlin.io.path.Path
+import kotlin.time.Duration
 import kotlin.time.measureTime
 
-var rar = Array(100) {BooleanArray(100) { false } }
+var rar = Array(100) { BooleanArray(100) { false } }
 var u: MutableList<List<Int>> = mutableListOf()
 var u2: MutableList<List<Int>> =
     mutableListOf() // The second part's input
@@ -11,8 +12,8 @@ var u2: MutableList<List<Int>> =
  * Used a "seen" set.
  * Whenever a "seen" value, appeared in a rule set, that update line become invalid
  */
-fun solve1() {
-    val result = u.sumOf { update ->
+fun solve1(): Int {
+    return u.sumOf { update ->
         val seen = mutableSetOf<Int>()
         var valid = true
         for (cu in update) {
@@ -25,7 +26,6 @@ fun solve1() {
         }
         if (valid) update[update.size / 2] else 0
     }
-    println("1: $result")
 }
 
 data class Node(var v: Int, var next: Node?)
@@ -35,16 +35,25 @@ data class LinkedList(var head: Node?)
 /**
  * Used a linked list to sort the updates.
  */
-fun solve2() {
-    val result = u2.sumOf { update ->
+fun solve2(): Int {
+    return u2.sumOf { update ->
         val ll = LinkedList(null)
         for (n in update) {
             placeNode(n, ll)
         }
         getAt(ll.head, update.size / 2)
     }
+}
 
-    println("2: $result")
+/**
+ * Using default Comparator function. (This runs waaay slower)
+ */
+fun solve2Extra(): Int {
+    return u2.sumOf { update ->
+        update.sortedWith { p1, p2 ->
+            if (rar[p1][p2]) -1 else 1
+        }[update.size / 2]
+    }
 }
 
 
@@ -69,6 +78,7 @@ fun placeNode(c: Int, ll: LinkedList) {
                 cur.next = Node(c, cur.next)
                 return
             }
+
             else -> cur = cur.next
         }
     }
@@ -96,18 +106,6 @@ fun getAt(node: Node?, at: Int): Int {
     return cur!!.v
 }
 
-val p = measureTime {
-    readFile()
-}
-
-val t = measureTime {
-    solve1()
-    solve2()
-}
-
-println("P: $p")
-println("T: $t")
-
 /**
  * Yes I parsed like this
  */
@@ -118,7 +116,7 @@ fun readFile() {
             s = false
         } else if (s) {
             val (k, v) = l.split("|", limit = 2).map(String::toInt)
-            rar[k][v]= true
+            rar[k][v] = true
         } else {
             u.add(
                 l.split(",").map(String::toInt)
@@ -127,3 +125,24 @@ fun readFile() {
     }
 }
 
+val p = measureTime {
+    readFile()
+}
+
+val t = measureTime {
+    val r = solve1()
+    println("1: $r")
+}
+val t2 = measureTime {
+    val r = solve2()
+    println("2: $r")
+}
+val t3 = measureTime {
+    val r = solve2Extra()
+    println("2_X: $r")
+}
+
+println("P: $p")
+println("T1: $t")
+println("T2: $t2")
+println("T2_X: $t3")
