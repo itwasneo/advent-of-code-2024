@@ -3,30 +3,33 @@ import java.nio.file.Paths
 import kotlin.time.measureTime
 
 val size = 130
-val roadMap = mutableSetOf<Pair<Int, Int>>() // Original guard path
+val roadMap = mutableSetOf<Vec2>() // Original guard path
 val obstMap =
     Array(size) { BooleanArray(size) { false } } // 2D array representing the obstruction positions
-var startPos: Pair<Int, Int>? = null // Guard's starting position
-typealias DIR = Pair<Int, Int> // Just more readable IMO
-val startDir = DIR(0, -1)
+var startPos: Vec2? = null // Guard's starting position
+val startDir = Vec2(0, -1)
+
+/**
+ * Like the idea of proper Vec2
+ */
+data class Vec2(var x: Int, var y: Int) {
+    operator fun plus(other: Vec2): Vec2 = Vec2(this.x + other.x, this.y + other.y)
+    operator fun minus(other: Vec2): Vec2 = Vec2(this.x - other.x, this.y - other.y)
+}
 
 /**
  * Just walk the grid
  */
 fun solve1() {
-    var (x, y) = startPos!!
+    var pos = startPos!!
     var dir = startDir
-    while (x in obstMap[0].indices && y in obstMap.indices) {
-        if (obstMap[y][x]) {
-            x -= dir.first
-            y -= dir.second
+    while (pos.x in obstMap[0].indices && pos.y in obstMap.indices) {
+        if (obstMap[pos.y][pos.x]) {
+            pos -= dir
             dir = dir.next()
-            x += dir.first
-            y += dir.second
         }
-        roadMap.add(Pair(x, y))
-        x += dir.first
-        y += dir.second
+        roadMap.add(pos)
+        pos += dir
     }
     val result = roadMap.size
     println("1: $result")
@@ -38,20 +41,16 @@ fun solve1() {
  * It always starts from the Guard's starting position
  */
 fun checkCyclic(edges: MutableSet<Pair<Int, Int>>): Boolean {
-    var (x, y) = startPos ?: return false
+    var pos = startPos ?: return false
     var dir = startDir
-    while (x in obstMap.indices && y in obstMap[0].indices) {
-        if (obstMap[y][x]) { // If you are on an obstruction go back and change direction
-            x -= dir.first
-            y -= dir.second
+    while (pos.x in obstMap.indices && pos.y in obstMap[0].indices) {
+        if (obstMap[pos.y][pos.x]) { // If you are on an obstruction go back and change direction
+            pos -= dir
             dir = dir.next()
         }
-        val from = to1D(x - dir.first, y - dir.second)
-        val to = to1D(x, y)
-        val edge = from to to
+        val edge = to1D(pos - dir) to to1D(pos)
         if (!edges.add(edge)) return true // If you went over an edge, you already visited CYCLIC
-        x += dir.first
-        y += dir.second
+        pos += dir
     }
     return false
 }
@@ -65,12 +64,12 @@ fun solve2() {
     val edges =
         mutableSetOf<Pair<Int, Int>>() // Store edges instead of vertices (using a global set and resetting it more performant)
     roadMap.forEach { p ->
-        obstMap[p.second][p.first] = true
+        obstMap[p.y][p.x] = true
         if (checkCyclic(edges)) {
             result++
         }
         edges.clear()
-        obstMap[p.second][p.first] = false
+        obstMap[p.y][p.x] = false
     }
     println("2: $result")
 }
@@ -94,18 +93,18 @@ println("T2: $t2")
 /**
  * Utility function to get direction, when see obstruction
  */
-fun DIR.next(): DIR = when (this) {
-    Pair(0, -1) -> Pair(1, 0)
-    Pair(1, 0) -> Pair(0, 1)
-    Pair(0, 1) -> Pair(-1, 0)
-    Pair(-1, 0) -> Pair(0, -1)
+fun Vec2.next(): Vec2 = when (this) {
+    Vec2(0, -1) -> Vec2(1, 0)
+    Vec2(1, 0) -> Vec2(0, 1)
+    Vec2(0, 1) -> Vec2(-1, 0)
+    Vec2(-1, 0) -> Vec2(0, -1)
     else -> throw RuntimeException()
 }
 
 /**
  * Utility to convert x and y position to single integer for better storage
  */
-fun to1D(x: Int, y: Int): Int = x * size + y
+fun to1D(v: Vec2): Int = v.x * size + v.y
 
 fun readInput() {
     Files.readAllLines(Paths.get("input\\day6_input.txt"))
@@ -122,12 +121,12 @@ fun readInput() {
 
                     else -> {
                         roadMap.add(
-                            Pair(
+                            Vec2(
                                 j,
                                 i
                             )
                         ) // Adding Guard's starting position
-                        startPos = Pair(j, i)
+                        startPos = Vec2(j, i)
                     }
                 }
             }
