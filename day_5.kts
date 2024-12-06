@@ -1,6 +1,5 @@
 import java.nio.file.Files
 import kotlin.io.path.Path
-import kotlin.time.Duration
 import kotlin.time.measureTime
 
 var rar = Array(100) { BooleanArray(100) { false } }
