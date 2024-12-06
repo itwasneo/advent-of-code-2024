@@ -32,14 +32,12 @@ fun solve1() {
     println("1: $result")
 }
 
-val edges =
-    mutableSetOf<Pair<Int, Int>>() // Store edges instead of vertices (using a global set and resetting it more performant)
 
 /**
  * Checks whether the upcoming path has a cyclic path by checking the already observed edges
  * It always starts from the Guard's starting position
  */
-fun checkCyclic(): Boolean {
+fun checkCyclic(edges: MutableSet<Pair<Int, Int>>): Boolean {
     var (x, y) = startPos ?: return false
     var dir = startDir
     while (x in obstMap.indices && y in obstMap[0].indices) {
@@ -64,9 +62,11 @@ fun checkCyclic(): Boolean {
  */
 fun solve2() {
     var result = 0
+    val edges =
+        mutableSetOf<Pair<Int, Int>>() // Store edges instead of vertices (using a global set and resetting it more performant)
     roadMap.forEach { p ->
         obstMap[p.second][p.first] = true
-        if (checkCyclic()) {
+        if (checkCyclic(edges)) {
             result++
         }
         edges.clear()
