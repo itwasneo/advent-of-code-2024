@@ -2,6 +2,8 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.nio.file.Files
 import java.nio.file.Paths
+import kotlin.math.log10
+import kotlin.math.pow
 import kotlin.time.measureTime
 
 /**
@@ -61,7 +63,13 @@ fun addMulConcat(acc: Long, node: Node?, t: Long): Boolean {
     } else if (node != null) {
         addMulConcat(acc + node.value, node.next, t) ||
                 addMulConcat(acc * node.value, node.next, t) ||
-                addMulConcat("$acc${node.value}".toLong(), node.next, t)
+                addMulConcat(
+                    acc * 10.0.pow(
+                        log10(node.value.toDouble()).toInt() + 1.0
+                    ).toLong() + node.value,
+                    node.next,
+                    t
+                )
     } else {
         acc == t
     }
