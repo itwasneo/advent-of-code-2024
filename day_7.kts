@@ -45,7 +45,9 @@ fun readAndSolve() {
 }
 
 fun addMul(acc: Long, node: Node?, t: Long): Boolean {
-    return if (node != null) {
+    return if (acc > t) { // Very Nice optimization (Saw it on Reddit)
+        false
+    } else if (node != null) {
         addMul(acc + node.value, node.next, t) ||
                 addMul(acc * node.value, node.next, t)
     } else {
@@ -54,7 +56,9 @@ fun addMul(acc: Long, node: Node?, t: Long): Boolean {
 }
 
 fun addMulConcat(acc: Long, node: Node?, t: Long): Boolean {
-    return if (node != null) {
+    return if (acc > t) { // Very Nice optimization (Saw it on Reddit)
+        false
+    } else if (node != null) {
         addMulConcat(acc + node.value, node.next, t) ||
                 addMulConcat(acc * node.value, node.next, t) ||
                 addMulConcat("$acc${node.value}".toLong(), node.next, t)
