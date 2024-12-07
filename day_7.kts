@@ -23,8 +23,11 @@ fun readAndSolve() {
                     numbers.drop(1),
                     target
                 )
-            ) part1 += target // Part1 Calculation
-            if (addMulConcat(
+            ) {
+                part1 += target
+                part2 += target // Not sure whether they design the input that way but this may prevent to run modified recursion
+            } // Part1 Calculation
+            else if (addMulConcat(
                     numbers.first(),
                     numbers.drop(1),
                     target
