@@ -63,7 +63,7 @@ fun addMulConcat(acc: Long, node: Node?, t: Long): Boolean {
     } else if (node != null) {
         addMulConcat(acc + node.value, node.next, t) ||
                 addMulConcat(acc * node.value, node.next, t) ||
-                addMulConcat(
+                addMulConcat( // Yes calculating this is faster than string manipulation
                     acc * 10.0.pow(
                         log10(node.value.toDouble()).toInt() + 1.0
                     ).toLong() + node.value,
