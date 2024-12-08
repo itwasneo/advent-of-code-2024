@@ -12,37 +12,35 @@ val antennas = mutableMapOf<Char, MutableList<Vec2>>()
 fun solve1() {
     val antiNodes = mutableSetOf<Vec2>()
     val antiNodes2 = mutableSetOf<Vec2>()
-    antennas.forEach { (k, v) ->
+    antennas.forEach { (_, v) ->
         //println("Processing: $k")
         for (i in v.indices) {
             for (j in i + 1 until v.size) {
                 val dist = v[i] - v[j]
-                val mdist = dist.minimal()
+                val mDist = dist.minimal()
                 val an1 = v[i] + dist
                 if (an1.x in 0 until width!! && an1.y in 0 until height!!) {
                     antiNodes.add(an1)
                     antiNodes2.add(an1)
                 }
-                var s1 = an1 + mdist
+                var s1 = an1 + mDist
                 while (s1.x in 0 until width!! && s1.y in 0 until height!!) {
                     antiNodes2.add(s1)
-                    s1 += mdist
+                    s1 += mDist
                 }
                 val an2 = v[j] - dist
                 if (an2.x in 0 until width!! && an2.y in 0 until height!!) {
                     antiNodes.add(an2)
                     antiNodes2.add(an2)
                 }
-                var s2 = an2 - mdist
+                var s2 = an2 - mDist
                 while (s2.x in 0 until width!! && s2.y in 0 until height!!) {
                     antiNodes2.add(s2)
-                    s2 -= mdist
+                    s2 -= mDist
                 }
-                //println("v1: ${v[i]}, v2: ${v[j]}, dist: $dist, an1: $an1, an2: $an2")
+                antiNodes2.add(v[i])
+                antiNodes2.add(v[j])
             }
-        }
-        if (v.size > 1) {
-            antiNodes2.addAll(v)
         }
     }
     println("1: ${antiNodes.size}")
