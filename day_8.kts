@@ -33,22 +33,22 @@ fun solve1and2() {
                 val mDist =
                     dist.minimal() // To find the unit (kind of) vector for part 2
                 val an1 = v[i] + dist
-                if (an1.x in 0 until size!! && an1.y in 0 until size!!) {
+                if (an1.x in 0 until size && an1.y in 0 until size) {
                     antiNodes.add(an1)
                     antiNodes2.add(an1)
                 }
                 var s1 = an1 + mDist
-                while (s1.x in 0 until size!! && s1.y in 0 until size!!) {
+                while (s1.x in 0 until size && s1.y in 0 until size) {
                     antiNodes2.add(s1)
                     s1 += mDist
                 }
                 val an2 = v[j] - dist
-                if (an2.x in 0 until size!! && an2.y in 0 until size!!) {
+                if (an2.x in 0 until size && an2.y in 0 until size) {
                     antiNodes.add(an2)
                     antiNodes2.add(an2)
                 }
                 var s2 = an2 - mDist
-                while (s2.x in 0 until size!! && s2.y in 0 until size!!) {
+                while (s2.x in 0 until size && s2.y in 0 until size) {
                     antiNodes2.add(s2)
                     s2 -= mDist
                 }
@@ -92,7 +92,6 @@ fun readInput() {
                         antennas[c] = mutableListOf(Vec2(x, y))
                     }
                 }
-                antennas
             }
         }
 }
