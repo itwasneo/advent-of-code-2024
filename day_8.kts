@@ -1,6 +1,5 @@
 import java.nio.file.Files
 import java.nio.file.Paths
-import kotlin.math.abs
 import kotlin.time.measureTime
 
 val size = 50
@@ -16,10 +15,8 @@ val antennas = mutableMapOf<Char, MutableList<Vec2>>()
  * - Count them (in my case I put them into a set)
  * Solution2:
  * - On top of all the anti nodes from the part 1
- * - Find the minimal distance unit vector of the distance you calculated. (In
- * my case, I integrated into my custom Vec2 class as a method)
  * - As you go through possible antenna pairs as in part1, loop through the possible
- * anti node positions that you find by adding and subtracting the unit vector you
+ * anti node positions that you find by adding and subtracting the distance vector you
  * calculated previously.
  */
 fun solve1and2() {
@@ -30,27 +27,25 @@ fun solve1and2() {
             for (j in i + 1 until v.size) {
                 val dist =
                     v[i] - v[j] // Find the actual distance between 2 antennas
-                val mDist = dist
-                //dist.minimal() // To find the unit (kind of) vector for part 2 (I thought this was necessary but obviously not)
                 val an1 = v[i] + dist
                 if (an1.x in 0 until size && an1.y in 0 until size) {
                     antiNodes.add(an1)
                     antiNodes2.add(an1)
                 }
-                var s1 = an1 + mDist
+                var s1 = an1 + dist
                 while (s1.x in 0 until size && s1.y in 0 until size) {
                     antiNodes2.add(s1)
-                    s1 += mDist
+                    s1 += dist
                 }
                 val an2 = v[j] - dist
                 if (an2.x in 0 until size && an2.y in 0 until size) {
                     antiNodes.add(an2)
                     antiNodes2.add(an2)
                 }
-                var s2 = an2 - mDist
+                var s2 = an2 - dist
                 while (s2.x in 0 until size && s2.y in 0 until size) {
                     antiNodes2.add(s2)
-                    s2 -= mDist
+                    s2 -= dist
                 }
                 antiNodes2.add(v[i]) // All the antenna pairs are effectively anti node in part2
                 antiNodes2.add(v[j])
@@ -70,15 +65,6 @@ data class Vec2(var x: Int, var y: Int) {
 
     operator fun minus(other: Vec2): Vec2 =
         Vec2(this.x - other.x, this.y - other.y)
-
-    fun minimal(): Vec2 {
-        val divisor = gcd(abs(x), abs(y)) // Use absolute values for GCD
-        return Vec2(x / divisor, y / divisor)
-    }
-
-    private fun gcd(a: Int, b: Int): Int {
-        return if (b == 0) a else gcd(b, a % b)
-    }
 }
 
 fun readInput() {
