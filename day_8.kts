@@ -30,8 +30,8 @@ fun solve1and2() {
             for (j in i + 1 until v.size) {
                 val dist =
                     v[i] - v[j] // Find the actual distance between 2 antennas
-                val mDist =
-                    dist.minimal() // To find the unit (kind of) vector for part 2
+                val mDist = dist
+                //dist.minimal() // To find the unit (kind of) vector for part 2 (I thought this was necessary but obviously not)
                 val an1 = v[i] + dist
                 if (an1.x in 0 until size && an1.y in 0 until size) {
                     antiNodes.add(an1)
