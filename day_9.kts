@@ -40,23 +40,25 @@ fun solve1() {
 }
 
 fun solve2() {
-    files.reversed().forEach { file ->
+    files.reversed().forEach { f ->
         var idx = 0
-        while (freeSpaces[idx].second < file.second && freeSpaces[idx].first < file.first) {
+        val (fileStart, fileSize, fileId) = f
+        while (freeSpaces[idx].second < fileSize && freeSpaces[idx].first < fileStart) {
             idx++
         }
-        if (freeSpaces[idx].second >= file.second && freeSpaces[idx].first < file.first) {
+        val (spaceStart, spaceSize) = freeSpaces[idx]
+        if (spaceSize >= fileSize && spaceStart < fileStart) {
             memoryLayout!!.fill(
-                file.third,
-                freeSpaces[idx].first,
-                freeSpaces[idx].first + file.second
+                fileId,
+                spaceStart,
+                spaceStart + fileSize
             )
-            memoryLayout!!.fill(-1, file.first, file.first + file.second)
+            memoryLayout!!.fill(-1, fileStart, fileStart + fileSize)
 
-            if (freeSpaces[idx].second > file.second) {
+            if (spaceSize > fileSize) {
                 freeSpaces[idx] = Pair(
-                    freeSpaces[idx].first + file.second,
-                    freeSpaces[idx].second - file.second
+                    spaceStart + fileSize,
+                    spaceSize - fileSize
                 )
             } else {
                 freeSpaces.removeAt(idx)
@@ -73,31 +75,26 @@ fun solve2() {
 
 
 fun readInput() {
-    var currentMemoryUnit = MemoryUnit.FILE
     input = Files.readString(Paths.get("input\\day9_input.txt"))
     memorySize = input!!.map(Char::digitToInt).sum()
     memoryLayout = IntArray(memorySize!!) { -1 }
     var cursor = 0
     var id = 0
+    var isFile = true
     input!!.forEach {
         val v = it.digitToInt()
-        when (currentMemoryUnit) {
-            MemoryUnit.FREE_SPACE -> {
-                freeSpaces.add(Pair(cursor, v))
-                cursor += v
-            }
-
-            MemoryUnit.FILE -> {
-                val jump = it.digitToInt()
-                memoryLayout!!.fill(id, cursor, cursor + jump)
-                files.add(Triple(cursor, jump, id))
-                cursor += jump
-                id += 1
-            }
+        if (isFile) {
+            val jump = it.digitToInt()
+            memoryLayout!!.fill(id, cursor, cursor + jump)
+            files.add(Triple(cursor, jump, id))
+            cursor += jump
+            id += 1
+        } else {
+            freeSpaces.add(Pair(cursor, v))
+            cursor += v
         }
-        currentMemoryUnit = currentMemoryUnit.alt()
+        isFile = !isFile
     }
-    //println(memoryLayoutAsList)
 }
 
 ManualClassLoader.load()
@@ -120,22 +117,6 @@ val t2 = measureTime {
 println("P: $p")
 println("T1: $t1")
 println("T2: $t2")
-
-/**
- * Utilities -----------------------------------------
- */
-enum class MemoryUnit {
-    FILE,
-    FREE_SPACE
-}
-
-fun MemoryUnit.alt(): MemoryUnit = when (this) {
-    MemoryUnit.FILE -> MemoryUnit.FREE_SPACE
-    MemoryUnit.FREE_SPACE -> MemoryUnit.FILE
-}
-
-// ---------------------------------------------------
-
 
 /**
  * Dummy class to warm-up JVM, before running the solution operations
