@@ -5,17 +5,16 @@ import kotlin.time.measureTime
 var input: String? = null
 var memorySize: Int? = null
 var memoryLayout: IntArray? = null
-var memoryLayoutAsList: MutableList<MemoryBlock> = mutableListOf()
+var freeSpaces: MutableList<Pair<Int, Int>> = mutableListOf()// (Index, Size)
+var files: MutableList<Triple<Int, Int, Int>> =
+    mutableListOf() // (Index, Size, ID)
 
 /**
  * It was an easy puzzle, but it took me so long to come up with a better approach
  * for part 2.
  * For the first part, I represented memory with an Array and swap the values.
- * For the second part, I created a custom class to represent MemoryBlock and put
- * them into a list. This prevents me to make any pointer arithmetic while swapping
- * the memory blocks, on the other hand, it has a very inefficient insert operation.
- * Since you can put files with sizes smaller than the free space, it creates new
- * free spaces that you need to add to the list :(
+ * I used the same Array approach to represent the memory, but this time I stored
+ * free spaces and files in different lists with their corresponding indices and sizes
  */
 fun solve1() {
     var pointer1 = 0
@@ -41,53 +40,33 @@ fun solve1() {
 }
 
 fun solve2() {
-    for (block in memoryLayoutAsList.reversed()) {
-        if (block.occupiedType == MemoryUnit.FILE) {
-            var index = 0
-            var cmb = memoryLayoutAsList[index]
-            while (cmb.occupiedType == MemoryUnit.FREE_SPACE && cmb.capacity < block.size || cmb.occupiedType == MemoryUnit.FILE && cmb.id != block.id) {
-                index++
-                cmb = memoryLayoutAsList[index]
-            }
-            if (cmb.id != block.id) {
-                cmb.id = block.id
-                cmb.size = block.size
-                if (cmb.capacity > block.size) {
-                    val remainingCapacity = cmb.capacity - cmb.size
-                    memoryLayoutAsList.add(
-                        index + 1,
-                        MemoryBlock(
-                            null,
-                            remainingCapacity,
-                            remainingCapacity,
-                            MemoryUnit.FREE_SPACE
-                        )
-                    )
-                }
-                cmb.capacity = block.size
-                cmb.occupiedType = MemoryUnit.FILE
-                block.occupiedType = MemoryUnit.FREE_SPACE
-                block.id = null
-            }
+    files.reversed().forEach { file ->
+        var idx = 0
+        while (freeSpaces[idx].second < file.second && freeSpaces[idx].first < file.first) {
+            idx++
+        }
+        if (freeSpaces[idx].second >= file.second && freeSpaces[idx].first < file.first) {
+            memoryLayout!!.fill(
+                file.third,
+                freeSpaces[idx].first,
+                freeSpaces[idx].first + file.second
+            )
+            memoryLayout!!.fill(-1, file.first, file.first + file.second)
 
+            if (freeSpaces[idx].second > file.second) {
+                freeSpaces[idx] = Pair(
+                    freeSpaces[idx].first + file.second,
+                    freeSpaces[idx].second - file.second
+                )
+            } else {
+                freeSpaces.removeAt(idx)
+            }
         }
     }
+    //println(memoryLayout.contentToString())
     var result = 0L
-    var currentIndex = 0
-    memoryLayoutAsList.forEach { block ->
-        when (block.occupiedType) {
-            MemoryUnit.FILE -> {
-                repeat(block.size) {
-                    result += currentIndex * block.id!!
-                    currentIndex++
-                }
-                currentIndex += block.capacity - block.size
-            }
-
-            MemoryUnit.FREE_SPACE -> {
-                currentIndex += block.capacity
-            }
-        }
+    for (i in memoryLayout!!.indices) {
+        if (memoryLayout!![i] != -1) result += i * memoryLayout!![i]
     }
     println("2: $result")
 }
@@ -104,30 +83,14 @@ fun readInput() {
         val v = it.digitToInt()
         when (currentMemoryUnit) {
             MemoryUnit.FREE_SPACE -> {
+                freeSpaces.add(Pair(cursor, v))
                 cursor += v
-                memoryLayoutAsList.add(
-                    MemoryBlock(
-                        null,
-                        v,
-                        v,
-                        MemoryUnit.FREE_SPACE
-                    )
-                )
             }
 
             MemoryUnit.FILE -> {
                 val jump = it.digitToInt()
-                memoryLayoutAsList.add(
-                    MemoryBlock(
-                        id,
-                        v,
-                        v,
-                        MemoryUnit.FILE
-                    )
-                )
-                for (i in cursor..<cursor + jump) {
-                    memoryLayout!![i] = id
-                }
+                memoryLayout!!.fill(id, cursor, cursor + jump)
+                files.add(Triple(cursor, jump, id))
                 cursor += jump
                 id += 1
             }
@@ -137,7 +100,7 @@ fun readInput() {
     //println(memoryLayoutAsList)
 }
 
-//ManualClassLoader.load()
+ManualClassLoader.load()
 val p = measureTime {
     readInput()
 }
@@ -145,6 +108,10 @@ val p = measureTime {
 val t1 = measureTime {
     solve1()
 }
+
+freeSpaces.clear()
+files.clear()
+readInput() // Just for refreshing the memory array
 
 val t2 = measureTime {
     solve2()
@@ -167,12 +134,6 @@ fun MemoryUnit.alt(): MemoryUnit = when (this) {
     MemoryUnit.FREE_SPACE -> MemoryUnit.FILE
 }
 
-data class MemoryBlock(
-    var id: Int?,
-    var size: Int,
-    var capacity: Int,
-    var occupiedType: MemoryUnit
-)
 // ---------------------------------------------------
 
 
