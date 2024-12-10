@@ -2,7 +2,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.time.measureTime
 
-
+/**
+ * Another easy one that needs no explanation. This year's problems waay easier
+ * than the last year's
+ */
 val size = 47
 var g: Array<IntArray> = Array(size) { IntArray(size) { -1 } }
 val dirs = arrayOf(Pair(1, 0), Pair(0, 1), Pair(-1, 0), Pair(0, -1))
@@ -47,25 +50,23 @@ fun walk(currentPosition: Pair<Int, Int>, target: Int): Set<Pair<Int, Int>>? {
 fun walkWithCounts(
     currentPosition: Pair<Int, Int>,
     target: Int
-): List<Pair<Int, Int>>? {
+): Int {
     if (!(currentPosition.first in 0..<size && currentPosition.second in 0..<size)) {
-        return null
+        return 0
     }
     if (g[currentPosition.second][currentPosition.first] != target) {
-        return null
+        return 0
     }
     return if (target == 9) {
-        listOf(currentPosition)
+        1
     } else {
-        val allEnds = mutableListOf<Pair<Int, Int>>()
-        dirs.forEach { dir ->
+        dirs.sumOf { dir ->
             val nextPosition = Pair(
                 currentPosition.first + dir.first,
                 currentPosition.second + dir.second
             )
-            walkWithCounts(nextPosition, target + 1)?.let { allEnds.addAll(it) }
+            walkWithCounts(nextPosition, target + 1)
         }
-        return allEnds
     }
 }
 
@@ -74,9 +75,7 @@ fun solve2() {
     g.forEachIndexed { y, row ->
         row.forEachIndexed { x, cell ->
             if (cell == 0) {
-                walkWithCounts(Pair(x, y), 0)?.let { ends ->
-                    result += ends.groupingBy { it }.eachCount().values.sum()
-                }
+                result += walkWithCounts(Pair(x, y), 0)
             }
         }
     }
@@ -101,12 +100,10 @@ val p = measureTime {
 }
 println("P: $p")
 
-/*
 val t1 = measureTime {
     solve1()
 }
 println("T1: $t1")
- */
 
 val t2 = measureTime {
     solve2()
