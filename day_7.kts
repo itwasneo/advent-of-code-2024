@@ -12,7 +12,7 @@ import kotlin.time.measureTime
 fun readAndSolve() {
     var part1 = 0L
     var part2 = 0L
-    Files.newInputStream(Paths.get("input\\day7_input.txt")).use {
+    Files.newInputStream(Paths.get("input\\day07_input.txt")).use {
         val br = BufferedReader(InputStreamReader(it))
         var line: String? = br.readLine()
         while (!line.isNullOrEmpty()) {

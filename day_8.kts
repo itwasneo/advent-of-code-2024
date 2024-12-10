@@ -68,7 +68,7 @@ data class Vec2(var x: Int, var y: Int) {
 }
 
 fun readInput() {
-    Files.readAllLines(Paths.get("input\\day8_input.txt"))
+    Files.readAllLines(Paths.get("input\\day08_input.txt"))
         .forEachIndexed { y, line ->
             line.forEachIndexed { x, c ->
                 if (c != '.') {

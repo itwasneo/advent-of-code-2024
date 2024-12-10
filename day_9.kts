@@ -75,7 +75,7 @@ fun solve2() {
 
 
 fun readInput() {
-    input = Files.readString(Paths.get("input\\day9_input.txt"))
+    input = Files.readString(Paths.get("input\\day09_input.txt"))
     memorySize = input!!.map(Char::digitToInt).sum()
     memoryLayout = IntArray(memorySize!!) { -1 }
     var cursor = 0

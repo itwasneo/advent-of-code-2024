@@ -13,8 +13,11 @@ val startDir = Vec2(0, -1)
  * Like the idea of proper Vec2
  */
 data class Vec2(var x: Int, var y: Int) {
-    operator fun plus(other: Vec2): Vec2 = Vec2(this.x + other.x, this.y + other.y)
-    operator fun minus(other: Vec2): Vec2 = Vec2(this.x - other.x, this.y - other.y)
+    operator fun plus(other: Vec2): Vec2 =
+        Vec2(this.x + other.x, this.y + other.y)
+
+    operator fun minus(other: Vec2): Vec2 =
+        Vec2(this.x - other.x, this.y - other.y)
 }
 
 /**
@@ -107,7 +110,7 @@ fun Vec2.next(): Vec2 = when (this) {
 fun to1D(v: Vec2): Int = v.x * size + v.y
 
 fun readInput() {
-    Files.readAllLines(Paths.get("input\\day6_input.txt"))
+    Files.readAllLines(Paths.get("input\\day06_input.txt"))
         .forEachIndexed { i, l ->
             l.trim().forEachIndexed { j, c ->
                 when (c) {

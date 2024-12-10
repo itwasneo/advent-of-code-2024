@@ -6,7 +6,7 @@ val dim = 140
 val input: Array<CharArray?> = arrayOfNulls(dim)
 fun readFile() {
     var r = 0
-    Files.readAllLines(Path("input\\day4_input.txt")).forEach { line ->
+    Files.readAllLines(Path("input\\day04_input.txt")).forEach { line ->
         input[r] = line.trim().toCharArray()
         r++
     }

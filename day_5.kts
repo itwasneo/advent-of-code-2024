@@ -107,7 +107,7 @@ fun getAt(node: Node?, at: Int): Int {
  */
 fun readFile() {
     var s = true
-    Files.readAllLines(Path("input\\day5_input.txt")).forEach { l ->
+    Files.readAllLines(Path("input\\day05_input.txt")).forEach { l ->
         if (l.isBlank()) {
             s = false
         } else if (s) {
