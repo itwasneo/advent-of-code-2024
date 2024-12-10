@@ -121,6 +121,7 @@ fun readInput() {
         }
 }
 
+ManualClassLoader.load()
 val p = measureTime {
     readInput()
 }
@@ -136,3 +137,22 @@ val t2 = measureTime {
 }
 println("T2: $t2")
 
+/**
+ * Dummy class to warm-up JVM, before running the solution operations
+ */
+class Dummy {
+    fun m() {
+    }
+}
+
+/**
+ * Utility to warm-up JVM
+ */
+object ManualClassLoader {
+    internal fun load() {
+        for (i in 0..99999) {
+            val dummy = Dummy()
+            dummy.m()
+        }
+    }
+}
