@@ -1,45 +1,82 @@
 import java.nio.file.Files
 import java.nio.file.Paths
+import java.util.*
 import kotlin.time.measureTime
 
 /**
  * Another easy one that needs no explanation. This year's problems waay easier
  * than the last year's
  */
+
+data class Vec2(var x: Int, var y: Int)
+
 val size = 47
 var g: Array<IntArray> = Array(size) { IntArray(size) { -1 } }
-val dirs = arrayOf(Pair(1, 0), Pair(0, 1), Pair(-1, 0), Pair(0, -1))
+val dirs = arrayOf(Vec2(1, 0), Vec2(0, 1), Vec2(-1, 0), Vec2(0, -1))
+val zeros = mutableListOf<Vec2>()
 
 fun solve1() {
-    var result = 0
-    g.forEachIndexed { y, row ->
-        row.forEachIndexed { x, cell ->
-            if (cell == 0) {
-                walk(Pair(x, y), 0)?.let {
-                    result += it.size
+    val result = zeros.sumOf { walk(it, 0)?.size ?: 0 }
+    //val result = zeros.sumOf { walkWithStack(it, 0) }
+    println("1: $result")
+}
+
+fun solve2() {
+    val result = zeros.sumOf { walkWithCounts(it, 0) }
+    println("2: $result")
+}
+
+/**
+ * This runs twice as much slower than recursion :(, but it was nice to see I
+ * didn't forget how to solve it not using recursion
+ */
+fun walkWithStack(pos: Vec2, target: Int): Int {
+    val stack = Stack<Pair<Vec2, Int>>()
+    val visited = mutableSetOf<Vec2>()
+    val foundEnds = mutableSetOf<Vec2>()
+
+    stack.push(Pair(pos, target))
+    while (stack.isNotEmpty()) {
+        val (p, t) = stack.pop()
+        if (p.x !in 0 until size || p.y !in 0 until size) {
+            continue
+        }
+
+        if (g[p.y][p.x] != t) {
+            continue
+        }
+
+        if (t == 9) {
+            foundEnds.add(p)
+        } else {
+            visited.add(p)
+            dirs.forEach {
+                val nextPosition =
+                    Vec2(p.x + it.x, p.y + it.y)
+                if (nextPosition !in visited) {
+                    stack.add(Pair(nextPosition, t + 1))
                 }
             }
         }
     }
-
-    println("1: $result")
+    return foundEnds.size
 }
 
-fun walk(currentPosition: Pair<Int, Int>, target: Int): Set<Pair<Int, Int>>? {
-    if (!(currentPosition.first in 0..<size && currentPosition.second in 0..<size)) {
+fun walk(currentPosition: Vec2, target: Int): Set<Vec2>? {
+    if (!(currentPosition.x in 0..<size && currentPosition.y in 0..<size)) {
         return null
     }
-    if (g[currentPosition.second][currentPosition.first] != target) {
+    if (g[currentPosition.y][currentPosition.x] != target) {
         return null
     }
     return if (target == 9) {
         setOf(currentPosition)
     } else {
-        val uniqueEnds = mutableSetOf<Pair<Int, Int>>()
+        val uniqueEnds = mutableSetOf<Vec2>()
         dirs.forEach { dir ->
-            val nextPosition = Pair(
-                currentPosition.first + dir.first,
-                currentPosition.second + dir.second
+            val nextPosition = Vec2(
+                currentPosition.x + dir.x,
+                currentPosition.y + dir.y
             )
             walk(nextPosition, target + 1)?.let { uniqueEnds.addAll(it) }
         }
@@ -48,38 +85,26 @@ fun walk(currentPosition: Pair<Int, Int>, target: Int): Set<Pair<Int, Int>>? {
 }
 
 fun walkWithCounts(
-    currentPosition: Pair<Int, Int>,
+    currentPosition: Vec2,
     target: Int
 ): Int {
-    if (!(currentPosition.first in 0..<size && currentPosition.second in 0..<size)) {
+    if (!(currentPosition.x in 0..<size && currentPosition.y in 0..<size)) {
         return 0
     }
-    if (g[currentPosition.second][currentPosition.first] != target) {
+    if (g[currentPosition.y][currentPosition.x] != target) {
         return 0
     }
     return if (target == 9) {
         1
     } else {
         dirs.sumOf { dir ->
-            val nextPosition = Pair(
-                currentPosition.first + dir.first,
-                currentPosition.second + dir.second
+            val nextPosition = Vec2(
+                currentPosition.x + dir.x,
+                currentPosition.y + dir.y
             )
             walkWithCounts(nextPosition, target + 1)
         }
     }
-}
-
-fun solve2() {
-    var result = 0
-    g.forEachIndexed { y, row ->
-        row.forEachIndexed { x, cell ->
-            if (cell == 0) {
-                result += walkWithCounts(Pair(x, y), 0)
-            }
-        }
-    }
-    println("2: $result")
 }
 
 fun readInput() {
@@ -88,6 +113,7 @@ fun readInput() {
             l.forEachIndexed { x, c ->
                 if (c.isDigit()) {
                     g[y][x] = c.digitToInt()
+                    if (c == '0') zeros.add(Vec2(x, y))
                 } else {
                     g[y][x] = -1
                 }
