@@ -7,20 +7,21 @@ import kotlin.time.measureTime
  * each cycle so that it doesn't use so much memory.
  */
 val fileName = "input\\day11_input.txt"
-var input: List<Pair<String, Long>> = mutableListOf()
+var input = mapOf<String, Long>()
 fun readInput() {
     input = Files.readString(Paths.get(fileName)).split(" ")
         .groupingBy { it }
         .eachCount()
-        .map { (key, value) -> key to value.toLong() }
+        .mapValues { (_, count) -> count.toLong() }
 }
 
 fun solve1() {
     var copied = input
     repeat(25) {
         copied = convert(copied)
+        //println(copied)
     }
-    val result = copied.sumOf { it.second }
+    val result = copied.values.sum()
     println("1: $result")
 }
 
@@ -28,29 +29,28 @@ fun solve2() {
     repeat(75) {
         input = convert(input)
     }
-    val result = input.sumOf { it.second }
+    val result = input.values.sum()
     println("2: $result")
 }
 
-fun convert(input: List<Pair<String, Long>>): List<Pair<String, Long>> {
-    val newList = mutableListOf<Pair<String, Long>>()
+fun convert(input: Map<String, Long>): Map<String, Long> {
+    val newMap = mutableMapOf<String, Long>()
     input.forEach { (num, amount) ->
         if (num == "0") {
-            newList.add(Pair("1", amount))
+            newMap["1"] = newMap.getOrPut("1") { 0 } + amount
         } else if ((num.length and 1) != 0) {
             val newVal = "${num.toLong() * 2024}"
-            newList.add(Pair(newVal, amount))
+            newMap[newVal] = newMap.getOrPut(newVal) { 0 } + amount
         } else {
             val m = num.length / 2
             val l = num.substring(0, m)
             val r = num.substring(m).trimStart { it == '0' }.ifEmpty { "0" }
-            newList.add(Pair(l, amount))
-            newList.add(Pair(r, amount))
+            newMap[l] = newMap.getOrPut(l) { 0 } + amount
+            newMap[r] = newMap.getOrPut(r) { 0 } + amount
         }
     }
 
-    return newList.groupBy { it.first }
-        .map { (key, value) -> key to value.sumOf { it.second } }
+    return newMap
 }
 
 val p = measureTime {
