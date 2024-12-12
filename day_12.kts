@@ -3,13 +3,24 @@ import java.nio.file.Paths
 import java.util.*
 import kotlin.time.measureTime
 
-// First Example 4 by 4 -> 140
-// Second Example 5 by 5 -> 772
-// Third Example 10 by 10 -> 1930
-
+/**
+ * Finally a good question. For part 1, I used a classic stack based path finding
+ * algorithm to extract each field as Set of Vec2s. In order to calculate the
+ * perimeters, I iterate each field cell and count how many adjacent cell it has
+ * and then subtract it from 4. Area is basically the size of field Sets.
+ *
+ * For part 2, I converted each cell in a field into "corners". Then count the
+ * unique points. If a corner is shared by 1 or 3 cells, that means it is a corner
+ * on the actual field. 1 edge case is the corners shared by 2 cells but "diagonally"
+ * (I handled that case exclusively). At the end, number of corners mean number
+ * of sides, easy :)
+ *
+ *      *--*
+ *      |xy|
+ *      *--*
+ */
 val size = 140
 val input = Array(size) { CharArray(size) { ' ' } }
-val visitedGridCells = mutableSetOf<Vec2>()
 val fields = mutableListOf<Set<Vec2>>()
 val dirs = listOf(
     Vec2(1, 0),
@@ -17,14 +28,9 @@ val dirs = listOf(
     Vec2(-1, 0),
     Vec2(0, -1)
 ) // RIGHT - DOWN - LEFT - UP
-val diag = listOf(
-    Vec2(1, 1),
-    Vec2(-1, 1),
-    Vec2(-1, -1),
-    Vec2(1, -1),
-)
 
 fun solve1() {
+    val visitedGridCells = mutableSetOf<Vec2>()
     input.forEachIndexed { y, row ->
         row.forEachIndexed { x, c ->
             if (Vec2(x, y) !in visitedGridCells) {
@@ -34,11 +40,9 @@ fun solve1() {
             }
         }
     }
-
     val result = fields.sumOf { f ->
         f.size * calculatePerimeter(f)
     }
-
     println("1: $result")
 }
 
@@ -57,39 +61,47 @@ fun calculatePerimeter(field: Set<Vec2>): Int {
         dirs.forEach { dir ->
             if (cell + dir in field) numberOfAdj++
         }
-        perimeter += 4 - numberOfAdj
+        perimeter += 4 - numberOfAdj // To calculate each cells contribution to the perimeter
     }
     return perimeter
 }
 
 fun calculateNumberOfSides(field: Set<Vec2>): Int {
     val corners = mutableMapOf<Vec2, Int>()
-    field.forEach { cell ->
+    field.forEach { cell -> // Each cell potentially has 4 corners
         listOf(
             cell,
             cell + dirs[0],
-            cell + diag[0],
+            cell + Vec2(1, 1),
             cell + dirs[1]
         ).forEach { currentCorner ->
-            corners[currentCorner] = corners.getOrPut(currentCorner) { 0 } + 1
+            corners[currentCorner] =
+                corners.getOrPut(currentCorner) { 0 } + 1 // Count have many unique cells shares this corner
         }
     }
     var result = 0
     corners.forEach { (k, v) ->
         if (v == 1 || v == 3) {
             result++
-        } else if (v == 2 && hasDiagonal(k, field)) {
-            result += 2
+        } else if (v == 2 && hasDiagonal(
+                k,
+                field
+            )
+        ) { // This is the special case with diagonally shared corner by 2 cells.
+            result += 2 // !!!IMPORTANT!!! not increase by 1
         }
     }
     return result
 }
 
 fun hasDiagonal(pos: Vec2, field: Set<Vec2>): Boolean {
-    return (pos in field && pos + diag[2] in field) || (pos + dirs[3] in field && pos + dirs[2] in field)
+    return (pos in field && pos + Vec2(
+        -1,
+        -1
+    ) in field) || (pos + dirs[3] in field && pos + dirs[2] in field)
 }
 
-
+// Classic path finder algorithm
 fun walkSingleField(currentField: Char, start: Vec2): Set<Vec2> {
     val seen = mutableSetOf<Vec2>()
     val path = Stack<Vec2>()
