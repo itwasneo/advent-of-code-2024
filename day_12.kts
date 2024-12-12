@@ -28,6 +28,15 @@ val dirs = listOf(
     Vec2(-1, 0),
     Vec2(0, -1)
 ) // RIGHT - DOWN - LEFT - UP
+val upLeft = Vec2(
+    -1,
+    -1
+) // Writing mostly used directions like this cuts around a millisecond
+val right = Vec2(1, 0)
+val down = Vec2(0, 1)
+val left = Vec2(-1, 0)
+val up = Vec2(0, -1)
+val downRight = Vec2(1, 1)
 
 fun solve1() {
     val visitedGridCells = mutableSetOf<Vec2>()
@@ -71,9 +80,9 @@ fun calculateNumberOfSides(field: Set<Vec2>): Int {
     field.forEach { cell -> // Each cell potentially has 4 corners
         listOf(
             cell,
-            cell + dirs[0],
-            cell + Vec2(1, 1),
-            cell + dirs[1]
+            cell + right,
+            cell + downRight,
+            cell + down
         ).forEach { currentCorner ->
             corners[currentCorner] =
                 corners.getOrPut(currentCorner) { 0 } + 1 // Count have many unique cells shares this corner
@@ -95,10 +104,7 @@ fun calculateNumberOfSides(field: Set<Vec2>): Int {
 }
 
 fun hasDiagonal(pos: Vec2, field: Set<Vec2>): Boolean {
-    return (pos in field && pos + Vec2(
-        -1,
-        -1
-    ) in field) || (pos + dirs[3] in field && pos + dirs[2] in field)
+    return (pos in field && pos + upLeft in field) || (pos + up in field && pos + left in field)
 }
 
 // Classic path finder algorithm
