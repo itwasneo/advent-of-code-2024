@@ -2,6 +2,10 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.time.measureTime
 
+/**
+ * Solution is too straightforward, if you can see that each claw machine actually
+ * represents 2 equations with 2 unknowns (Vertically!!).
+ */
 val fileName = "input\\day13_input.txt"
 val clawMachines = mutableListOf<Pair<LongArray, LongArray>>()
 
@@ -43,7 +47,7 @@ fun readInput(part2: Boolean) {
     */
 }
 
-fun solve1() {
+fun solve(part2: Boolean) {
     val result = clawMachines.sumOf { cm ->
         val lcm = lcm(
             cm.first[0],
@@ -64,30 +68,7 @@ fun solve1() {
             return@sumOf 0
         }
         val a = (cm.second[2] - cm.second[1] * b) / cm.second[0]
-        if (a <= 0 || b <= 0) {
-            0
-        } else {
-            a * 3 + b
-        }
-    }
-    println("1: $result")
-}
-
-fun solve12() {
-    val result = clawMachines.sumOf { cm ->
-        val lcm = lcm(
-            cm.first[1],
-            cm.second[1]
-        ) // Finding Button B's Least Common Multiple
-        val coef1 = lcm / cm.first[1]
-        val coef2 = lcm / cm.second[1]
-        val x1Tc1 = cm.first[0] * coef1
-        val x2Tc2 = cm.second[0] * coef2
-        val p1Tc1 = cm.first[2] * coef1
-        val p2Tc2 = cm.second[2] * coef2
-        val a = (p2Tc2 - p1Tc1) / (x2Tc2 - x1Tc1)
-        val b = (cm.first[2] - cm.first[0] * a) / cm.first[1]
-        if (a > 100 || b > 100 || a <= 0 || b <= 0) {
+        if (a <= 0 || b <= 0 || (!part2 && (a > 100 || b > 100))) {
             0
         } else {
             a * 3 + b
@@ -105,11 +86,19 @@ private fun lcm(a: Long, b: Long): Long {
 }
 
 val p = measureTime {
-    readInput(true)
+    readInput(false)
 }
 println("P: $p")
 
 val t1 = measureTime {
-    solve1()
+    solve(false)
 }
 println("T1: $t1")
+
+clawMachines.clear()
+readInput(true)
+val t2 = measureTime {
+    solve(true)
+}
+println("T2: $t2")
+
