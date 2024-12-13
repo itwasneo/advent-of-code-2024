@@ -11,8 +11,8 @@ val clawMachines = mutableListOf<Pair<LongArray, LongArray>>()
 
 fun readInput(part2: Boolean) {
     val txt = Files.readAllLines(Paths.get(fileName))
-    var eq1 = LongArray(3) { -1 }
-    var eq2 = LongArray(3) { -1 }
+    val eq1 = LongArray(3) { -1 }
+    val eq2 = LongArray(3) { -1 }
     txt.forEach { line ->
         if (line.isBlank() || line.isEmpty()) {
             clawMachines.add(Pair(eq1.copyOf(), eq2.copyOf()))
