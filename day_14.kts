@@ -6,8 +6,15 @@ import java.nio.file.Paths
 import javax.imageio.ImageIO
 import kotlin.time.measureTime
 
-//val w = 11
-//val h = 7
+/**
+ * Well since there was no clear explanation about how the "Christmas tree" should
+ * look like, first I solve the second part with brute force. I created pngs for
+ * each frame and look through them to find a tree shaped struct.
+ *
+ * After seeing how the tree look like I realized that checking for 10 consecutive
+ * non-zero integers in my grid horizontally each frame would result in the right
+ * answer.
+ */
 val w = 101
 val h = 103
 val mw = (w / 2)
@@ -24,18 +31,15 @@ fun readInput() {
                 .map { x: String ->
                     x.drop(2).split(",", limit = 2).map(String::toInt)
                 }
-            grid[p[1]][p[0]] += 1
+            grid[p[1]][p[0]] += 1 // Creating the grid (Every non-zero cell represents one or more robots)
             positions.add(Vec2(p[0], p[1]))
             moves.add(Vec2(v[0], v[1]))
-            val horizontalMove = (v[0] * 100) % w
-            val verticalMove = (v[1] * 100) % h
-            val changeX = p[0] + horizontalMove
-            val changeY = p[1] + verticalMove
-            val finalX =
-                if (changeX < 0) w + changeX else if (changeX >= w) changeX - w else changeX
-            val finalY =
-                if (changeY < 0) h + changeY else if (changeY >= h) changeY - h else changeY
-            //println("p: $p, v: $v")
+            val horizontalMove =
+                (v[0] * 100) % w // Calculating the total horizontal move after 100 steps
+            val verticalMove =
+                (v[1] * 100) % h // Calculating the total vertical move after 100 steps
+            val finalX = wrapCoordinate(p[0] + horizontalMove, w)
+            val finalY = wrapCoordinate(p[1] + verticalMove, h)
             Vec2(finalX, finalY)
         }.groupBy { x -> getQuadrant(x) }
 
@@ -44,64 +48,57 @@ fun readInput() {
     println("1: $result")
 }
 
+/**
+ * Moves each robot inside the grid, 1 step according to their velocities
+ */
 fun moveRobots() {
     positions.forEachIndexed { i, p ->
-        val changeX = p.x + moves[i].x
-        val changeY = p.y + moves[i].y
-        val finalX =
-            if (changeX < 0) w + changeX else if (changeX >= w) changeX - w else changeX
-        val finalY =
-            if (changeY < 0) h + changeY else if (changeY >= h) changeY - h else changeY
-        positions[i] = Vec2(finalX, finalY)
+        val changeX = wrapCoordinate(p.x + moves[i].x, w)
+        val changeY = wrapCoordinate(p.y + moves[i].y, h)
+        positions[i] = Vec2(changeX, changeY)
         grid[p.y][p.x] -= 1
-        grid[finalY][finalX] += 1
+        grid[changeY][changeX] += 1
     }
 }
 
-fun createPngFromArray(array: Array<IntArray>, outputPath: String) {
-    // Get dimensions of the array
-    val height = h
-    val width = w
+/**
+ * Utility function to clamp x and y values
+ */
+fun wrapCoordinate(value: Int, max: Int): Int = (value + max) % max
 
-    // Create a BufferedImage
-    val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
-
-    // Set pixels based on the array
-    for (y in array.indices) {
-        for (x in array[y].indices) {
-            val color =
-                if (array[y][x] == 0) Color.BLACK.rgb else Color.WHITE.rgb
-            image.setRGB(x, y, color)
-        }
-    }
-
-    // Write the image to a file
-    val outputFile = File(outputPath)
-    ImageIO.write(image, "png", outputFile)
-}
-
-fun render() {
-    var cnt = 0
-
-    repeat(10000) {
-        //if (checkGrid()) break
+/**
+ * Simulates robot movements until grid check successful
+ */
+fun solve2() {
+    var cnt = 1 // ;)
+    while (true) {
         moveRobots()
-        createPngFromArray(grid, "output\\Frame$cnt.png")
+        //createPngFromArray(grid, "output\\Frame$cnt.png")
+        if (checkGrid()) {
+            //printGrid()
+            break
+        }
         cnt++
     }
+    println("2: $cnt")
 }
 
+/**
+ * Checks for 10 consecutive non-zero cells
+ */
 fun checkGrid(): Boolean {
-    return grid[h - 1].asList().none { it == 0 }
-}
-
-fun printGrid() {
     grid.forEach {
-        it.forEach { c ->
-            if (c == 0) print("#") else print(" ")
+        var count = 0
+        for (num in it) {
+            if (num != 0) {
+                count++
+                if (count == 10) return true
+            } else {
+                count = 0
+            }
         }
-        println("")
     }
+    return false
 }
 
 val p = measureTime {
@@ -109,7 +106,10 @@ val p = measureTime {
 }
 println("P: $p")
 
-render()
+val t2 = measureTime {
+    solve2()
+}
+println("T2: $t2")
 
 enum class Q {
     FIRST,
@@ -145,4 +145,39 @@ data class Vec2(var x: Int, var y: Int) {
         return "($x - $y)"
     }
 
+}
+
+fun printGrid() {
+    grid.forEach {
+        it.forEach { c ->
+            if (c == 0) print("#") else print(" ")
+        }
+        println("")
+    }
+}
+
+/**
+ * Used during brute force for part 2. Creates a png file for the grid
+ * White pixels represent robots
+ */
+fun createPngFromArray(array: Array<IntArray>, outputPath: String) {
+    // Get dimensions of the array
+    val height = h
+    val width = w
+
+    // Create a BufferedImage
+    val image = BufferedImage(width, height, BufferedImage.TYPE_INT_RGB)
+
+    // Set pixels based on the array
+    for (y in array.indices) {
+        for (x in array[y].indices) {
+            val color =
+                if (array[y][x] == 0) Color.BLACK.rgb else Color.WHITE.rgb
+            image.setRGB(x, y, color)
+        }
+    }
+
+    // Write the image to a file
+    val outputFile = File(outputPath)
+    ImageIO.write(image, "png", outputFile)
 }
