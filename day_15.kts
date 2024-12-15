@@ -2,8 +2,8 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import kotlin.time.measureTime
 
-val size = 10
-val filename = "input\\day15_input_example.txt"
+val size = 50
+val filename = "input\\day15_input.txt"
 val grid = Array(size) { Array(size) { Cell.F } }
 var tGrid = Array(size) { Array(size) { Cell.F } }
 var grid2 = Array(size) { Array(size * 2) { Cell.F } }
@@ -13,6 +13,7 @@ val down = Vec2(0, 1)
 val left = Vec2(-1, 0)
 val up = Vec2(0, -1)
 var start: Vec2? = null
+var start2: Vec2? = null
 
 fun readInput() {
     val lines = Files.readAllLines(Paths.get(filename))
@@ -37,6 +38,7 @@ fun readInput() {
                     grid2[y][x] = Cell.T
                     grid2[y][x + 1] = Cell.F
                     start = Vec2(x / 2, y)
+                    start2 = Vec2(x, y)
                 }
 
                 '.' -> {
@@ -82,7 +84,6 @@ fun readInput() {
         println("")
     }
     println("====================================")
-
      */
 
     /*
@@ -116,6 +117,186 @@ fun solve1() {
     }
     println("1: $result")
 }
+
+fun solve2() {
+    var result = 0
+    var currentPosition = start2!!
+    moves.forEach { move ->
+        //println("APPLYING $move")
+        currentPosition = applyMove2(currentPosition, move)
+
+        /*
+        grid2.forEach {
+            it.forEach { c ->
+                print(c)
+            }
+            println("")
+        }
+        println("==================================================")
+
+         */
+    }
+    grid2.forEachIndexed { y, r ->
+        r.forEachIndexed { x, c ->
+            if (c == Cell.L) result += 100 * y + x
+        }
+    }
+    println("2: $result")
+}
+
+fun applyMove2(currentPosition: Vec2, move: Vec2): Vec2 {
+    val n = currentPosition + move
+    return if (grid2[n.y][n.x] == Cell.F) {
+        grid2[currentPosition.y][currentPosition.x] = Cell.F
+        grid2[n.y][n.x] = Cell.T
+        return n
+    } else if (grid2[n.y][n.x] == Cell.W) {
+        return currentPosition
+    } else if (grid2[n.y][n.x] == Cell.L && move != left || grid2[n.y][n.x] == Cell.R && move != right) {
+        when (move) {
+            right -> {
+                val s = n.x
+                val e =
+                    (s..size * 2).first { grid2[n.y][it] == Cell.W } // Finding first Wall, there must be at least 1
+                val firstEmptyCell =
+                    (s..e).firstOrNull { grid2[n.y][it] == Cell.F }
+                if (firstEmptyCell == null) {
+                    return currentPosition
+                }
+                grid2[currentPosition.y][currentPosition.x] = Cell.F
+                grid2[n.y][firstEmptyCell] = Cell.R
+                (s + 1..<firstEmptyCell).forEach {
+                    grid2[n.y][it] = flipBox(grid2[n.y][it])
+                }
+                grid2[n.y][n.x] = Cell.T
+                return n
+            }
+
+            left -> {
+                val s = n.x
+                val e =
+                    (s downTo 0).first { grid2[n.y][it] == Cell.W } // Finding first Wall, there must be at least 1
+                val firstEmptyCell =
+                    (s downTo e).firstOrNull { grid2[n.y][it] == Cell.F }
+                if (firstEmptyCell == null) {
+                    return currentPosition
+                }
+                grid2[currentPosition.y][currentPosition.x] = Cell.F
+                grid2[n.y][firstEmptyCell] = Cell.L
+                (firstEmptyCell + 1..<s).forEach {
+                    grid2[n.y][it] = flipBox(grid2[n.y][it])
+                }
+                grid2[n.y][n.x] = Cell.T
+                return n
+            }
+
+            up -> {
+                val upCell = grid2[n.y][n.x]
+                if (upCell == Cell.L && canGoVertical(n, n + right, up)) {
+                    goVertical(n, n + right, up)
+                    grid2[currentPosition.y][currentPosition.x] = Cell.F
+                    grid2[n.y][n.x + 1] = Cell.F
+                    grid2[n.y][n.x] = Cell.T
+                    return n
+                } else if (upCell == Cell.R && canGoVertical(n + left, n, up)) {
+                    goVertical(n + left, n, up)
+                    grid2[currentPosition.y][currentPosition.x] = Cell.F
+                    grid2[n.y][n.x - 1] = Cell.F
+                    grid2[n.y][n.x] = Cell.T
+                    return n
+                } else {
+                    return currentPosition
+                }
+            }
+
+            down -> {
+                val downCell = grid2[n.y][n.x]
+                if (downCell == Cell.L && canGoVertical(n, n + right, down)) {
+                    goVertical(n, n + right, down)
+                    grid2[currentPosition.y][currentPosition.x] = Cell.F
+                    grid2[n.y][n.x + 1] = Cell.F
+                    grid2[n.y][n.x] = Cell.T
+                    return n
+                } else if (downCell == Cell.R && canGoVertical(
+                        n + left,
+                        n,
+                        down
+                    )
+                ) {
+                    goVertical(n + left, n, down)
+                    grid2[currentPosition.y][currentPosition.x] = Cell.F
+                    grid2[n.y][n.x - 1] = Cell.F
+                    grid2[n.y][n.x] = Cell.T
+                    return n
+                } else {
+                    return currentPosition
+                }
+            }
+
+            else -> throw RuntimeException("UNKNOWN MOVE")
+        }
+        return Vec2(0, 0)
+    } else {
+        throw RuntimeException("FATAL ERROR : ${grid2[n.y][n.x]}")
+    }
+}
+
+fun goVertical(l: Vec2, r: Vec2, d: Vec2) {
+    if (grid2[l.y][l.x] == Cell.L && grid2[r.y][r.x] == Cell.R) {
+        goVertical(l + d, r + d, d)
+    } else if (grid2[l.y][l.x] == Cell.R && grid2[r.y][r.x] == Cell.L) {
+        goVertical(l + d + left, l + d, d)
+        goVertical(r + d, r + d + right, d)
+    } else if (grid2[r.y][r.x] == Cell.L) {
+        goVertical(r + d, r + d + right, d)
+    } else if (grid2[l.y][l.x] == Cell.R) {
+        goVertical(l + d + left, l + d, d)
+    }
+
+    if (grid2[l.y][l.x] == Cell.F && grid2[r.y][r.x] == Cell.F) {
+        when (Cell.T) {
+            grid2[l.y - d.y][l.x] -> {
+                grid2[l.y - d.y][l.x] = Cell.F
+            }
+
+            grid2[r.y - d.y][r.x] -> {
+                grid2[r.y - d.y][r.x] = Cell.F
+            }
+
+            else -> {
+                grid2[l.y - d.y][l.x] = Cell.F
+                grid2[r.y - d.y][r.x] = Cell.F
+            }
+        }
+        grid2[l.y][l.x] = Cell.L
+        grid2[r.y][r.x] = Cell.R
+    }
+}
+
+fun canGoVertical(l: Vec2, r: Vec2, d: Vec2): Boolean {
+    val leftCell = grid2[l.y][l.x]
+    val rightCell = grid2[r.y][r.x]
+    return if (leftCell == Cell.F && rightCell == Cell.F) {
+        true
+    } else if (leftCell == Cell.W || rightCell == Cell.W) {
+        false
+    } else if (leftCell == Cell.L && rightCell == Cell.R) {
+        canGoVertical(l + d, r + d, d)
+    } else if (leftCell == Cell.R && rightCell == Cell.L) {
+        canGoVertical(l + d + left, l + d, d) && canGoVertical(
+            r + d,
+            r + d + right,
+            d
+        )
+    } else if (leftCell == Cell.R) {
+        canGoVertical(l + d + left, l + d, d)
+    } else if (rightCell == Cell.L) {
+        canGoVertical(r + d, r + d + right, d)
+    } else {
+        throw RuntimeException("THIS SHOULDN'T HAPPEN")
+    }
+}
+
 
 fun applyMove(currentPosition: Vec2, move: Vec2): Vec2 {
     val n = currentPosition + move
@@ -219,6 +400,11 @@ val t1 = measureTime {
 }
 println("T1: $t1")
 
+val t2 = measureTime {
+    solve2()
+}
+println("T2: $t2")
+
 
 
 
@@ -244,6 +430,16 @@ enum class Cell {
     };
 
     abstract override fun toString(): String
+}
+
+fun flipBox(boxSide: Cell): Cell {
+    return when (boxSide) {
+        Cell.L -> Cell.R
+        Cell.R -> Cell.L
+        else -> throw RuntimeException(
+            "CAN'T FLIP : $boxSide"
+        )
+    }
 }
 
 data class Vec2(var x: Int, var y: Int) {
