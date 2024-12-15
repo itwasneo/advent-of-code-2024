@@ -27,7 +27,6 @@ val up = Vec2(0, -1)
 var start: Vec2? = null
 var start2: Vec2? = null
 
-
 fun solve1() {
     var result = 0
     var currentPosition = start!!
@@ -259,21 +258,19 @@ fun goVertical(l: Vec2, r: Vec2, d: Vec2) {
         grid2[l.y][l.x] == Cell.R -> goVertical(l + d + left, l + d, d)
     }
 
-    if (grid2[l.y][l.x] == Cell.F && grid2[r.y][r.x] == Cell.F) {
-        val aboveLeft = grid2[l.y - d.y][l.x]
-        val aboveRight = grid2[r.y - d.y][r.x]
+    val aboveLeft = grid2[l.y - d.y][l.x]
+    val aboveRight = grid2[r.y - d.y][r.x]
 
-        if (aboveLeft == Cell.T || aboveRight == Cell.T) {
-            if (aboveLeft == Cell.T) grid2[l.y - d.y][l.x] = Cell.F
-            if (aboveRight == Cell.T) grid2[r.y - d.y][r.x] = Cell.F
-        } else {
-            grid2[l.y - d.y][l.x] = Cell.F
-            grid2[r.y - d.y][r.x] = Cell.F
-        }
-
-        grid2[l.y][l.x] = Cell.L
-        grid2[r.y][r.x] = Cell.R
+    if (aboveLeft == Cell.T || aboveRight == Cell.T) {
+        if (aboveLeft == Cell.T) grid2[l.y - d.y][l.x] = Cell.F
+        if (aboveRight == Cell.T) grid2[r.y - d.y][r.x] = Cell.F
+    } else {
+        grid2[l.y - d.y][l.x] = Cell.F
+        grid2[r.y - d.y][r.x] = Cell.F
     }
+
+    grid2[l.y][l.x] = Cell.L
+    grid2[r.y][r.x] = Cell.R
 }
 
 fun canGoVertical(l: Vec2, r: Vec2, d: Vec2): Boolean {
