@@ -30,17 +30,17 @@ fun solve2() {
 }
 
 fun canFormString(target: String): Boolean {
+    val maxLength = patterns!!.maxOf { it.length }
     val dp = BooleanArray(target.length + 1)
     dp[0] = true
 
     for (i in 1..target.length) {
-        for (word in patterns!!) {
-            if (i >= word.length && target.substring(
-                    i - word.length,
-                    i
-                ) == word
-            ) {
-                dp[i] = dp[i] || dp[i - word.length]
+        for (j in 1..maxLength) {
+            if (i >= j) {
+                val word = target.substring(i - j, i)
+                if (patterns!!.contains(word)) {
+                    dp[i] = dp[i] || dp[i - j]
+                }
             }
         }
     }
@@ -49,17 +49,17 @@ fun canFormString(target: String): Boolean {
 }
 
 fun canFormStringNTimes(target: String): Long {
+    val maxLength = patterns!!.maxOf { it.length }
     val dp = LongArray(target.length + 1)
     dp[0] = 1
 
     for (i in 1..target.length) {
-        for (word in patterns!!) {
-            if (i >= word.length && target.substring(
-                    i - word.length,
-                    i
-                ) == word
-            ) {
-                dp[i] += dp[i - word.length]
+        for (j in 1..maxLength) {
+            if (i >= j) {
+                val word = target.substring(i - j, i)
+                if (patterns!!.contains(word)) {
+                    dp[i] += dp[i - j]
+                }
             }
         }
     }
