@@ -4,6 +4,9 @@ import kotlin.time.measureTime
 
 /**
  * Very cool algorithm to implement. It's a classic dynamic programming problem.
+ * To optimize the solution, I only check the last N characters of the target string
+ * where N is the maximum length of the patterns. This reduces search space significantly.
+ * I believe we can also build a Trie structure to optimize the search even more.
  */
 var patterns: Set<String>? = null
 var designs: Set<String>? = null
