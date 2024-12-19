@@ -10,6 +10,7 @@ import kotlin.time.measureTime
  */
 var patterns: Set<String>? = null
 var designs: Set<String>? = null
+var maxLength = 0
 
 fun readInput() {
     val input = Files.readString(Paths.get("input\\day19_input.txt"))
@@ -17,7 +18,7 @@ fun readInput() {
 
     patterns = p1.split(",").map(String::trim).toSet()
     designs = p2.split("\r\n").map(String::trim).toSet()
-
+    maxLength = patterns!!.maxOf { it.length }
 }
 
 fun solve1() {
@@ -33,7 +34,6 @@ fun solve2() {
 }
 
 fun canFormString(target: String): Boolean {
-    val maxLength = patterns!!.maxOf { it.length }
     val dp = BooleanArray(target.length + 1)
     dp[0] = true
 
@@ -52,7 +52,6 @@ fun canFormString(target: String): Boolean {
 }
 
 fun canFormStringNTimes(target: String): Long {
-    val maxLength = patterns!!.maxOf { it.length }
     val dp = LongArray(target.length + 1)
     dp[0] = 1
 
