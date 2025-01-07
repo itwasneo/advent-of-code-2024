@@ -3,6 +3,7 @@ import java.nio.file.Paths
 import kotlin.time.measureTime
 
 var buyers = listOf<Long>()
+val sharedSequenceCountMaps = mutableMapOf<List<Int>, Int>()
 
 fun readInput() {
     buyers = Files.readAllLines(Paths.get("input/day22_input.txt"))
@@ -18,6 +19,45 @@ fun solve1() {
         secret
     }
     println("1: $result")
+}
+
+fun solve2() {
+    buyers.forEach { s ->
+        val diffSequence = arrayOfNulls<Pair<Int, Int>>(2000)
+        val seen = mutableSetOf<List<Int>>()
+        var secret = s
+        var currentPrice = getPrice(secret)
+        var idx = 0
+        while (idx < 2000) {
+            val newSecret = evolveSecret(secret)
+            val nextPrice = getPrice(newSecret)
+            diffSequence[idx] =
+                Pair((nextPrice - currentPrice).toInt(), nextPrice.toInt())
+            secret = newSecret
+            currentPrice = nextPrice
+            idx++
+        }
+        diffSequence.toList()
+            .windowed(size = 4, step = 1, partialWindows = false)
+            .forEach { seq ->
+                val currentSequence = seq.map { it!!.first }
+                val price = seq.last()!!.second
+                if (!seen.contains(currentSequence)) {
+                    sharedSequenceCountMaps[currentSequence] =
+                        sharedSequenceCountMaps.getOrDefault(
+                            currentSequence,
+                            0
+                        ) + price
+                }
+                seen.add(currentSequence)
+            }
+    }
+
+    println("2: ${sharedSequenceCountMaps.values.maxOrNull()}")
+}
+
+private fun getPrice(secret: Long): Long {
+    return secret % 10
 }
 
 private fun mixValueIntoSecret(value: Long, secret: Long): Long {
@@ -58,5 +98,10 @@ val t1 = measureTime {
     solve1()
 }
 
+val t2 = measureTime {
+    solve2()
+}
+
 println("P: $p")
 println("T1: $t1")
+println("T2: $t2")
