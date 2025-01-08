@@ -4,6 +4,7 @@ import kotlin.time.measureTime
 
 val wireMap = mutableMapOf<String, Boolean>()
 val notCalculated = mutableSetOf<Instruction>()
+val resultMap = mutableMapOf<String, Instruction>()
 
 fun readInput() {
     var checkingWires = true
@@ -38,6 +39,12 @@ fun readInput() {
                         )
                     )
                 }
+                resultMap[resultWire] = Instruction(
+                    wire1,
+                    wire2,
+                    oper,
+                    resultWire
+                )
             }
         }
 }
@@ -70,6 +77,60 @@ fun solve1() {
     println("1: $result")
 }
 
+fun solve2() {
+    val x = createNumber("x")
+    val y = createNumber("y")
+    val z = getBits("z")
+
+    val xPlusy = x + y
+    val xPlusyBits = convertToBooleanList(xPlusy)
+
+    val notMatchingIndices = mutableListOf<Int>()
+    for (i in z.indices) {
+        if (z[i] != xPlusyBits[i]) {
+            notMatchingIndices.add(i)
+        }
+    }
+    println("Indices: $notMatchingIndices")
+    z.forEach { if (it) print("1") else print("0") }
+    println()
+    xPlusyBits.forEach { if (it) print("1") else print("0") }
+    println()
+    notMatchingIndices.forEach { num ->
+        val wire = resultMap.filter {
+            it.key.startsWith("z") && it.key.endsWith(
+                String.format("%02d", num)
+            )
+        }
+    }
+}
+
+fun getBits(wirePrefix: String): List<Boolean> {
+    val keys = wireMap.filter { it.key.startsWith(wirePrefix) }.keys.sorted()
+    return keys.map { wireMap[it]!! }
+}
+
+fun createNumber(wirePrefix: String): Long {
+    val bits = getBits(wirePrefix)
+    var result = 0L
+    for ((index, bit) in bits.withIndex()) {
+        if (bit) {
+            result = result or (1L shl index)
+        }
+    }
+    return result
+}
+
+fun convertToBooleanList(number: Long): List<Boolean> {
+    val bits = mutableListOf<Boolean>()
+    var n = number
+    while (n > 0) {
+        bits.add(n % 2 == 1L)
+        n /= 2
+    }
+    return bits
+}
+
 data class Instruction(
     val wire1: String,
     val wire2: String,
@@ -85,5 +146,10 @@ val t1 = measureTime {
     solve1()
 }
 
+val t2 = measureTime {
+    solve2()
+}
+
 println(p)
 println(t1)
+println(t2)
