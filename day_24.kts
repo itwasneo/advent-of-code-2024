@@ -5,6 +5,7 @@ import kotlin.time.measureTime
 val wireMap = mutableMapOf<String, Boolean>()
 val notCalculated = mutableSetOf<Instruction>()
 val resultMap = mutableMapOf<String, Instruction>()
+val seen = mutableSetOf<Instruction>()
 
 fun readInput() {
     var checkingWires = true
@@ -91,17 +92,31 @@ fun solve2() {
             notMatchingIndices.add(i)
         }
     }
-    println("Indices: $notMatchingIndices")
-    z.forEach { if (it) print("1") else print("0") }
-    println()
-    xPlusyBits.forEach { if (it) print("1") else print("0") }
-    println()
-    notMatchingIndices.forEach { num ->
-        val wire = resultMap.filter {
-            it.key.startsWith("z") && it.key.endsWith(
-                String.format("%02d", num)
-            )
-        }
+    println(notMatchingIndices)
+    val sortedKeys = resultMap.keys.filter { it.startsWith("z") }.sorted()
+
+    sortedKeys.forEach {
+        printInstructions(resultMap[it])
+        println()
+    }
+}
+
+// sgt mcm
+fun printInstructions(instr: Instruction?) {
+    if (instr == null || instr in seen) {
+        return
+    }
+
+    seen.add(instr)
+
+    if (!instr.wire1.startsWith("x") || !instr.wire2.startsWith("y")) {
+        val instr1 = resultMap[instr.wire1]
+        val instr2 = resultMap[instr.wire2]
+        println("${instr.resultWire} = ${instr.wire1} ${instr.oper} ${instr.wire2}")
+        printInstructions(instr1)
+        printInstructions(instr2)
+    } else {
+        println("${instr.resultWire} = ${instr.wire1} ${instr.oper} ${instr.wire2}")
     }
 }
 
@@ -153,3 +168,28 @@ val t2 = measureTime {
 println(p)
 println(t1)
 println(t2)
+
+/*
+
+z05 = sgt OR bhb
+sgt = y05 AND x05
+bhb = ggh AND tvp
+ggh = rkg OR kff
+rkg = bjc AND tkj
+kff = x04 AND y04
+tvp = y05 XOR x05
+
+z06 = vjh XOR jst
+vjh = y06 XOR x06
+jst = ggh XOR tvp
+
+z16 = jpj XOR scq
+jpj = dnt OR ckf
+dnt = vhr XOR dvj
+vhr = hdb OR rkf
+hdb = y14 AND x14
+rkf = kkk AND jhf
+dvj = x15 XOR y15
+ckf = vhr AND dvj
+scq = x16 XOR y16
+ */
