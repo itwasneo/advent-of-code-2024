@@ -1,163 +1,126 @@
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.*
+import kotlin.math.abs
 import kotlin.time.measureTime
 
-var numberMovementMap = mutableMapOf<Char, MutableMap<Char, List<String>>>()
-var directionMovementMap = mutableMapOf<Char, MutableMap<Char, List<String>>>()
+private var codes: List<String> = emptyList()
 
-data class Position(val x: Int, val y: Int)
-
-val keypad = mapOf(
-    '7' to Position(0, 0), '8' to Position(1, 0), '9' to Position(2, 0),
-    '4' to Position(0, 1), '5' to Position(1, 1), '6' to Position(2, 1),
-    '1' to Position(0, 2), '2' to Position(1, 2), '3' to Position(2, 2),
-    '0' to Position(1, 3), 'A' to Position(2, 3)
+private val numpad = mapOf(
+    '7' to NP(0, 0), '8' to NP(1, 0), '9' to NP(2, 0),
+    '4' to NP(0, 1), '5' to NP(1, 1), '6' to NP(2, 1),
+    '1' to NP(0, 2), '2' to NP(1, 2), '3' to NP(2, 2),
+    '_' to NP(0, 3), '0' to NP(1, 3), 'A' to NP(2, 3)
 )
 
-val directions = listOf(
-    Pair(0, -1) to '^', // Up
-    Pair(0, 1) to 'v',  // Down
-    Pair(-1, 0) to '<', // Left
-    Pair(1, 0) to '>'   // Right
+private val directionPad = mapOf(
+    '^' to NP(1, 0), 'A' to NP(2, 0),
+    '<' to NP(0, 1), 'v' to NP(1, 1), '>' to NP(2, 1)
 )
 
-val directionKeypad = mapOf(
-    '^' to Position(1, 0), 'A' to Position(2, 0),
-    '<' to Position(0, 1), 'v' to Position(1, 1), '>' to Position(2, 1)
-)
-
-fun bfsAllPaths(
-    start: Position,
-    end: Position,
-    kp: Map<Char, Position>
-): List<String> {
-    val queue: Queue<Pair<Position, String>> = LinkedList()
-    val visited = mutableMapOf<Position, Int>()
-    val paths = mutableListOf<String>()
-    queue.add(start to "")
-    visited[start] = 0
-
-    while (queue.isNotEmpty()) {
-        val (current, path) = queue.poll()
-        if (current == end) {
-            paths.add(path)
-            continue
-        }
-
-        for ((dir, move) in directions) {
-            val next = Position(current.x + dir.first, current.y + dir.second)
-            val newPath = path + move
-            if (next in kp.values) {
-                val newDist = newPath.length
-                if (next !in visited || newDist <= visited[next]!!) {
-                    queue.add(next to newPath)
-                    visited[next] = newDist
-                }
-            }
-        }
-    }
-    return paths
-}
-
-fun buildAllMovementMap() {
-    for ((startKey, startPos) in keypad) {
-        numberMovementMap[startKey] = mutableMapOf()
-        for ((endKey, endPos) in keypad) {
-            if (startKey != endKey) {
-                numberMovementMap[startKey]!![endKey] =
-                    bfsAllPaths(startPos, endPos, keypad)
-            }
-        }
-    }
-}
-
-fun buildDirectionMovementMap() {
-    for ((startKey, startPos) in directionKeypad) {
-        directionMovementMap[startKey] = mutableMapOf()
-        for ((endKey, endPos) in directionKeypad) {
-            if (startKey != endKey) {
-                directionMovementMap[startKey]!![endKey] =
-                    bfsAllPaths(startPos, endPos, directionKeypad)
-            }
-        }
-    }
-}
-
-fun chainRobots(numberSequence: String): String {
-    var currentNumber = 'A'
-    var result = StringBuilder()
-    numberSequence.forEach { number ->
-        val numberPath = getNumberKeypadMovements(currentNumber, number)
-
-        var currentDirection = 'A'
-        numberPath.forEach { direction ->
-            val directionPath =
-                getDirectionKeypadMovements(currentDirection, direction)
-            val last = directionPath.last()
-            val pressA = getDirectionKeypadMovements(last, 'A')
-            result.append(directionPath + 'A' + pressA)
-            currentDirection = last
-        }
-        result.append('A')
-        currentNumber = number
-    }
-    return result.toString()
-}
-
-fun getDirectionKeypadMovements(start: Char, end: Char): String {
-    val movements =
-        directionMovementMap[start]?.get(end)?.firstOrNull() ?: return ""
-    return movements
-}
-
-fun getNumberKeypadMovements(start: Char, end: Char): String {
-    val movements =
-        numberMovementMap[start]?.get(end)?.firstOrNull() ?: return ""
-    return movements
+fun readInput() {
+    codes = Files.readAllLines(Paths.get("input/day21_input_example.txt"))
 }
 
 fun solve1() {
-    buildAllMovementMap()
-    buildDirectionMovementMap()
-    /*
-    numberMovementMap.forEach { (start, destinations) ->
-        println("From $start:")
-        destinations.forEach { (end, paths) ->
-            println("  To $end: ${paths.joinToString(", ")}")
-        }
-    }
-    directionMovementMap.forEach { (start, destinations) ->
-        println("From $start:")
-        destinations.forEach { (end, paths) ->
-            println("  To $end: ${paths.joinToString(", ")}")
-        }
-    }
-     */
-    println(chainRobots("029A"))
-}
-
-fun readInput() {
-    Files.readAllLines(Paths.get("input\\day21_input_example.txt"))
-        .forEachIndexed { y, line ->
-            line.forEachIndexed { x, char ->
-                print(char)
+    codes.forEach { c ->
+        val code = "A$c"
+        val all1 = mutableListOf<String>()
+        val i1 = code.windowed(2, 1, false) {
+            moveFromToNumPad(it[0], it[1], "").map { m ->
+                pressButton(m)
             }
-            println()
         }
+
+        val secondControllerMoves = StringBuilder()
+        "A$firstControllerMoves".windowed(2, 1, false) {
+            moveFromToDirectionPad(it[0], it[1], secondControllerMoves)
+            pressButton(secondControllerMoves)
+        }
+
+        val thirdControllerMoves = StringBuilder()
+        "A$secondControllerMoves".windowed(2, 1, false) {
+            moveFromToDirectionPad(it[0], it[1], thirdControllerMoves)
+            pressButton(thirdControllerMoves)
+        }
+
+        println(thirdControllerMoves.length)
+    }
 }
 
-/*
 val p = measureTime {
     readInput()
 }
-
-println(p)
-
- */
 
 val t1 = measureTime {
     solve1()
 }
 
-println(t1)
+println("P: $p")
+println("T1: $t1")
+
+data class NP(val x: Int, val y: Int)
+
+private fun moveFromToNumPad(
+    from: Char,
+    to: Char,
+    acc: String
+): List<String> {
+    val fromPos = numpad[from] ?: error("Invalid from")
+    val toPos = numpad[to] ?: error("Invalid to")
+
+    val rowDiff = toPos.y - fromPos.y
+    val colDiff = toPos.x - fromPos.x
+    var result1 = acc
+    var result2 = acc
+
+    repeat(abs(rowDiff)) {
+        result1 += if (rowDiff > 0) 'v' else '^'
+    }
+    repeat(abs(colDiff)) {
+        result1 += if (colDiff > 0) '>' else '<'
+    }
+
+    repeat(abs(rowDiff)) {
+        result2 = if (rowDiff > 0) "v$result2" else "^$result2"
+    }
+    repeat(abs(colDiff)) {
+        result2 = if (colDiff > 0) ">$result2" else "<$result2"
+    }
+
+    return listOf(result1, result2)
+}
+
+private fun moveFromToDirectionPad(
+    from: Char,
+    to: Char,
+    acc: String
+): List<String> {
+    val fromPos = directionPad[from] ?: error("Invalid from")
+    val toPos = directionPad[to] ?: error("Invalid to")
+
+    val rowDiff = toPos.y - fromPos.y
+    val colDiff = toPos.x - fromPos.x
+
+    var result1 = acc
+    var result2 = acc
+
+    repeat(abs(rowDiff)) {
+        result1 += if (rowDiff > 0) 'v' else '^'
+    }
+    repeat(abs(colDiff)) {
+        result1 += if (colDiff > 0) '>' else '<'
+    }
+
+    repeat(abs(rowDiff)) {
+        result2 = if (rowDiff > 0) "v$result2" else "^$result2"
+    }
+    repeat(abs(colDiff)) {
+        result2 = if (colDiff > 0) ">$result2" else "<$result2"
+    }
+
+    return listOf(result1, result2)
+}
+
+private fun pressButton(acc: String): String {
+    return "${acc}A"
+}
